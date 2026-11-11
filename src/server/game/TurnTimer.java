@@ -2,9 +2,6 @@ package server.game;
 
 public class TurnTimer {
 	
-	public static final int CHAT_TIME = 30;
-	public static final int VOTE_TIME = 30;
-	
 	private GameManager gameManager; //시간초과를 알릴 대상
 	private Thread timerThread;
 	

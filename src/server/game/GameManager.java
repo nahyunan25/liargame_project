@@ -26,14 +26,26 @@ public class GameManager {
 	//외부 연결
 	private RoomManager roomManager;
 	
-	//생성자
+	//생성자: RoomManager와 연동
 	public GameManager(RoomManager roomManager, List<Player>players) {};
 	
-	//외부에서 호출
+	//외부에서 호출 -> 담당자에게 넘기기만
 	public void startGame() {}; 
-	public void handleChat(Player player, String text) {};
-	public void handleVote(Player voter, Player target) {};
-	public void handleLiarGuess(Player player, String answer) {};
-	public GamePhase getPhase() {return phase;};
+	public void handleChat(Player player, String text) { //-> ChatManager
+		if(phase == GamePhase.CHATTING) {
+			chatManager.handleChat(player, text);
+		}
+	}; 
+	public void handleVote(Player voter, Player target) { //-> VoteManager의 handleChat과 연결
+		if (phase == GamePhase.VOTING) {
+			voteManager.handleVote(voter, target);
+		}
+	}; 
+	public void handleLiarGuess(Player player, String answer) {}; 
 	
+	//GameManager에서 단계 관리
+	//담당자들이 각 단계가 끝나면 GameManager에게 알림
+	public void chatEnd() {};
+	public void voteEnd() {};
+	public void timeOut() {};
 }
