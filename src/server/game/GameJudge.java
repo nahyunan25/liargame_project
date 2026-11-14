@@ -2,7 +2,7 @@ package server.game;
 
 import java.util.List;
 
-import server.room.Player;
+import common.Player;
 
 public class GameJudge {
 	public boolean isLiar(Player target) {return false;}; //지목한 사람이 라이어인지

@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import server.room.Player;
+import common.Player;
 
 public class VoteManager {
 	private List<Player> voters; //투표할 수 있는 사람(살아있는 사람)

@@ -1,4 +1,4 @@
-package server.game;
+package common;
 
 public enum Role {
 	CITIZEN,

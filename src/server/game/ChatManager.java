@@ -2,8 +2,8 @@ package server.game;
 
 import java.util.List;
 
+import common.Player;
 import server.room.GameRoom;
-import server.room.Player;
 
 public class ChatManager {
 	private List<Player> turnOrder; //이번 라운드 발언 순서자

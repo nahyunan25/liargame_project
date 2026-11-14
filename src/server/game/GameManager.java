@@ -2,7 +2,7 @@ package server.game;
 
 import java.util.List;
 
-import server.room.Player;
+import common.Player;
 import server.room.RoomManager;
 
 //역할지정, 채팅, 시간, 투표, 판정
@@ -31,12 +31,12 @@ public class GameManager {
 	
 	//외부에서 호출 -> 담당자에게 넘기기만
 	public void startGame() {}; 
-	public void handleChat(Player player, String text) { //-> ChatManager
+	public void handleChat(Player player, String text) { //-> ChatManager의 handleChat과 연결
 		if(phase == GamePhase.CHATTING) {
 			chatManager.handleChat(player, text);
 		}
 	}; 
-	public void handleVote(Player voter, Player target) { //-> VoteManager의 handleChat과 연결
+	public void handleVote(Player voter, Player target) { //-> VoteManager의 handleVote과 연결
 		if (phase == GamePhase.VOTING) {
 			voteManager.handleVote(voter, target);
 		}

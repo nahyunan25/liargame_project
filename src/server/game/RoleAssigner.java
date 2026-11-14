@@ -3,7 +3,7 @@ package server.game;
 import java.util.List;
 import java.util.Random;
 
-import server.room.Player;
+import common.Player;
 
 public class RoleAssigner {
 	private Random random = new Random(); //무작위 선택용
