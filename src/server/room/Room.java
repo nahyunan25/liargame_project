@@ -1,5 +1,5 @@
 package server.room;
 
-public class GameRoom {
+public class Room {
 
 }
