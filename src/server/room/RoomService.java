@@ -28,11 +28,12 @@ public class RoomService {
         }
     }
 	
-	
+	// 게임 시작은 방장 권한
 	// 게임 시작 조건 : 게임이 시작 전이고 최소 인원이 채워졌을 때
 	// 문구 출력 책임은 ClientHandler에게 전달 ,,
-	public boolean canStartGame(Room room) {
-
+	public boolean canStartGame(Room room, Player player) {
+		if (!player.equals(room.getHost())) return false;
+		
 	    if (!room.isWaiting()) {
 	        System.out.println("게임이 진행 중입니다.");
 	        return false;
@@ -44,6 +45,14 @@ public class RoomService {
 	    }
 
 	    System.out.println("게임을 시작할 수 있습니다.");
+	    return true;
+	}
+	
+	public boolean startGame(Room room, Player player) {
+	    if (!canStartGame(room, player)) {
+	        return false;
+	    }
+	    room.startGame();
 	    return true;
 	}
 }

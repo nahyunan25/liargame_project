@@ -113,4 +113,8 @@ public class Room {
 	public boolean isPlaying() {
         return state == RoomState.PLAYING;
     }
+	
+	public void startGame() {
+	    this.state = RoomState.PLAYING;
+	}
 }
