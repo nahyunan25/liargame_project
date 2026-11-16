@@ -104,6 +104,7 @@ public class Room {
 	    return players.isEmpty();
 	}
 	
+	
 	// 대기실 클래스를 따로 만들지 않고, 상태로 구분
 	// 게임이 시작되면 방의 상태를 변경
 	public boolean isWaiting() {

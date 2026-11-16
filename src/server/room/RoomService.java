@@ -28,6 +28,7 @@ public class RoomService {
         }
     }
 	
+	
 	// 게임 시작 조건 : 게임이 시작 전이고 최소 인원이 채워졌을 때
 	// 문구 출력 책임은 ClientHandler에게 전달 ,,
 	public boolean canStartGame(Room room) {

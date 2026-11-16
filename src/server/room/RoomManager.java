@@ -17,7 +17,7 @@ public class RoomManager {
 	public Room createRoom(Player host, String title, 
 			String gameMode, String difficulty, int maxPlayers, 
 			boolean isPublic, String password) {
-
+		
 		int roomId = nextRoomId++;
 		Room room;
     
