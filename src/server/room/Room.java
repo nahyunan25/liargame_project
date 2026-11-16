@@ -51,9 +51,9 @@ public class Room {
 	    
 	    // 테스트용 플레이어 4명 생성
 	    // host 의 아이디가 1이라고 가정함
-	    this.players.add(new Player(2, "Player2", false));
-	    this.players.add(new Player(3, "Player3", false));
-	    this.players.add(new Player(4, "Player4", false));
+	    this.players.add(new Player(2, false));
+	    this.players.add(new Player(3, false));
+	    this.players.add(new Player(4, false));
 
 	}
 
@@ -127,12 +127,18 @@ public class Room {
 	    this.state = RoomState.PLAYING;
 	}
 	
-	
 	public void printPlayers() {
-	    System.out.println("플레이어 목록");
+	    System.out.println("=== 플레이어 목록 ===");
 
 	    for (Player player : players) {
-	        System.out.println("ID: " + player.getId() + ", 닉네임: " + player.getNickname());
+	        System.out.print("ID: " + player.getId());
+
+	        if (player == host) {
+	            System.out.print(" (방장)");
+	        }
+
+	        System.out.println();
 	    }
 	}
+	
 }

@@ -29,7 +29,7 @@ public class ClientHandler extends Thread {
 		
 		// Player 객체 생성
 		int id = nextId++;
-	    this.player = new Player(id, "Player" + id, false);
+	    this.player = new Player(id, false);
 
 	}
 	

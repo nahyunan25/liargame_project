@@ -34,6 +34,7 @@ public class Server {
             RoomService roomService = new RoomService(roomManager);
             List<Player> players = new ArrayList<>();
             
+            
             GameManager gameManager = new GameManager(roomManager, players);
 
             //클라이언트 연결

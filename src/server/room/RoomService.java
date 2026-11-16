@@ -14,7 +14,7 @@ public class RoomService {
 	}
 	
 
-	// ClientHandler와 RoomService 사이를 연결해줌
+	// ClientHandler와 RoomManager 사이를 연결해줌
 	public Room createRoom(Player host, String title,
             String gameMode, String difficulty, int maxPlayers,
             boolean isPublic, String password) {
@@ -35,7 +35,7 @@ public class RoomService {
         return roomService.getAllRooms();
     }
 	
-    // RoomManager 만의 메소드
+    // RoomService 만의 메소드
     
 	public void joinRoom(Room room, Player player) {
 		if (room.isPlaying()) {
