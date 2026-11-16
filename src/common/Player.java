@@ -3,16 +3,14 @@ import common.Role;
 
 //플레이어 정보
 public class Player {
-    private int id;                  // 플레이어 번호 (발언 순서 기준)
-    private String nickname;        
+    private int id;                  // 플레이어 번호 (발언 순서 기준)       
     private boolean bot;             
     private Role role;             
     private PlayerStatus status;     // ALIVE, DIED, REVEALED_LIAR
     // TODO: 통신 담당의 ClientHandler 연결 (메시지 전송용)
 
-    public Player(int id, String nickname, boolean bot) {
+    public Player(int id, boolean bot) {
         this.id = id;
-        this.nickname = nickname;
         this.bot = bot;
         this.status = PlayerStatus.ALIVE;
     }
@@ -20,10 +18,6 @@ public class Player {
     //===== 기본 정보 =====
     public int getId() {
         return id;
-    }
-
-    public String getNickname() {
-        return nickname;
     }
 
     public boolean isBot() {
