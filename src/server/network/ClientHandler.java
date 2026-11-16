@@ -69,6 +69,10 @@ public class ClientHandler extends Thread {
 				
 				//모든 클라이언트한테 입력 내용 보여주기
 				write("Player" + player.getId()+ ": " + tokens[1]);
+				
+				//서버 콘솔에도 출력
+				log("Player" + player.getId()+ ": "+ tokens[1]);
+				
 				//메세지 case
 				switch(tokens[0]) {
 					case "CHAT":
