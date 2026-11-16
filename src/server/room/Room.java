@@ -47,6 +47,14 @@ public class Room {
 
 	    this.players = new ArrayList<>();
 	    this.players.add(host);
+	    
+	    
+	    // 테스트용 플레이어 4명 생성
+	    // host 의 아이디가 1이라고 가정함
+	    this.players.add(new Player(2, "Player2", false));
+	    this.players.add(new Player(3, "Player3", false));
+	    this.players.add(new Player(4, "Player4", false));
+
 	}
 
 	// 비공개방 생성자
@@ -59,9 +67,10 @@ public class Room {
 	    this.isPublic = false;
 	    this.password = password;
 	}
-
+	
 
 	private List<Player> players;
+	
 	
 	public void addPlayer(Player player) {
 		if (isPlaying() || isFull()) {
@@ -116,5 +125,14 @@ public class Room {
 	
 	public void startGame() {
 	    this.state = RoomState.PLAYING;
+	}
+	
+	
+	public void printPlayers() {
+	    System.out.println("플레이어 목록");
+
+	    for (Player player : players) {
+	        System.out.println("ID: " + player.getId() + ", 닉네임: " + player.getNickname());
+	    }
 	}
 }
