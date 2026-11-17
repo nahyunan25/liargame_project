@@ -13,7 +13,6 @@ public class VoteManager {
 	
 	//투표 시작
 	public void startVote(List<Player> voters, List<Player> candidates) {
-		
 		this.voters = voters;
 		this.candidates = candidates;
 		
@@ -22,19 +21,7 @@ public class VoteManager {
 	
 	//투표 내역 저장
 	public void handleVote(Player voter, Player target) {
-		
-		//이미 투표했으면
-		if(votes.containsKey(voter)) {
-			voter.send("이미 투표했습니다.");
-			return;
-		}
-		
 		votes.put(voter, target);
-		voter.send("투표를 완료하였습니다.");
-		
-		
-		//콘솔에서만 누가 누구 투표했는지 보이게하기
-		System.out.println("Player" +  voter.getId() + "-> Player" + target.getId()+ "에게 투표");
 	}
 	
 	
