@@ -1,4 +1,4 @@
-package server.game;
+package common;
 
 public class GameConfig {
 	//인원
@@ -12,8 +12,14 @@ public class GameConfig {
 	private GameConfig() {}; //객체 생성 막기 (값만 가져다쓰는 클래스)
 	
 	//인원수에 따른 라이어 수 설정
-	public static int getLiarCount(int playerCount) {return 0;};
+	public static int getLiarCount(int playerCount) {
+		if (playerCount <= 6) return 1;
+	    else return 2;
+	};
 	//인원수에 따른 최대 라운드
-	public static int getMaxRound(int playerCount) {return 0;};
+	public static int getMaxRound(int playerCount) {
+		if (playerCount <= 6) return 2;
+	    else return 4;
+		};
 	
 }

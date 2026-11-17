@@ -9,26 +9,36 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import server.game.GameManager;
+import server.room.RoomService;
 import common.Player;
 
 public class ClientHandler extends Thread {
 	private GameManager gameManager;
+	private RoomService roomService;
 	private Player player;
+	private static int nextId = 1;
 	private Socket socket;
 	List<PrintWriter> lw;
 	
 	//서버와 클라이언트 연결 중비
-	public ClientHandler(Socket socket, List<PrintWriter> lw, GameManager gameManager) {
+	public ClientHandler(Socket socket, List<PrintWriter> lw, GameManager gameManager, RoomService roomService) {
 		this.socket = socket;
 		this.lw = lw;
 		this.gameManager = gameManager;
+		this.roomService = roomService;
+		
+		// Player 객체 생성
+		int id = nextId++;
+	    this.player = new Player(id, false);
 
 	}
 	
+	/* 이 메소드는 삭제해도 괜찮을 것 같습니다
 	//플레이어 정보 저장
 	public void setPlayer(Player player) {
 		this.player = player;
 		}
+		*/
 
 	@Override
 	public void run() {
@@ -59,6 +69,10 @@ public class ClientHandler extends Thread {
 				
 				//모든 클라이언트한테 입력 내용 보여주기
 				write("Player" + player.getId()+ ": " + tokens[1]);
+				
+				//서버 콘솔에도 출력
+				log("Player" + player.getId()+ ": "+ tokens[1]);
+				
 				//메세지 case
 				switch(tokens[0]) {
 					case "CHAT":
