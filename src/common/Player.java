@@ -1,4 +1,6 @@
 package common;
+import java.io.PrintWriter;
+
 import common.Role;
 
 //플레이어 정보
@@ -8,7 +10,7 @@ public class Player {
     private boolean bot;             
     private Role role;             
     private PlayerStatus status;     // ALIVE, DIED, REVEALED_LIAR
-    // TODO: 통신 담당의 ClientHandler 연결 (메시지 전송용)
+    private PrintWriter writer;
 
     public Player(int id, boolean bot) {
         this.id = id;
@@ -41,6 +43,20 @@ public class Player {
 
     public void setStatus(PlayerStatus status) {
         this.status = status;
+    }
+    
+    //===== 메시지 전송 =====
+    public void setWriter(PrintWriter writer) {
+    	this.writer = writer;
+    }
+    
+    public void send(String msg) {
+    	if (writer != null) {
+			writer.println(msg);
+		}
+    	else {
+			System.out.println("[Player" + id + "에게] " + msg);
+		}
     }
 
     //===== 새 게임 준비 (대기실로 돌아갈 때) =====

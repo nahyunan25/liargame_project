@@ -13,6 +13,7 @@ import server.room.RoomManager;
 
 //역할지정, 채팅, 시간, 투표, 판정
 public class GameManager {
+	private static final int DEMO_START_PLAYERS = 4;
 	//게임 데이터 변수
 	private List<Player> players;
 	private List<Player> liars;
@@ -41,8 +42,19 @@ public class GameManager {
 	};
 	
 	//외부에서 호출 -> 담당자에게 넘기기만
+	public synchronized void join(Player player) {
+		players.add(player);
+		player.send("당신은 Player" + player.getId() + "입니다.");
+		broadcast("Player" + player.getId() + " 입장 (" + players.size() + "/" + DEMO_START_PLAYERS + ")");
+
+		if (players.size() == DEMO_START_PLAYERS) {
+			startGame();
+		}
+	}
+	
 	public synchronized void startGame() {
 		maxRound = GameConfig.getMaxRound(players.size());
+		System.out.println("=============================");
 		
 		//1단계: role assign
 		liars = roleAssigner.selectLiars(players);
@@ -63,11 +75,13 @@ public class GameManager {
 				sendTo(p, "주제: " + category + " / 제시어: " + keyword);
 			}
 		};
+		System.out.println("=============================");
 		
 		//4단계: 첫 라운드 시작
-		round = 1;
+		round = 0;
 		nextRound();
 	}
+	
 	public synchronized void handleChat(Player player, String text) { //-> ChatManager의 handleChat과 연결
 		if (phase != GamePhase.CHATTING) return;
 		if (player.getStatus() != PlayerStatus.ALIVE) return; //조건 2가지: CHATTING 상태, ALIVE상태
@@ -82,9 +96,8 @@ public class GameManager {
 			turnTimer.stop();
 			voteEnd(getTopVoted());
 		};
-		
 	}; 
-	public void handleLiarGuess(Player player, String answer) {
+	public synchronized void handleLiarGuess(Player player, String answer) {
 		if (phase != GamePhase.LIAR_GUESSING) return;
 		
 		if (gameJudge.checkLiarGuess(answer, keyword)) {
@@ -93,20 +106,22 @@ public class GameManager {
 		else {
 			finishGame(Role.CITIZEN);
 		}
+		System.out.println("=============================");
 	}; 
 	
 	
 	//GameManager에서 단계 관리
 	//담당자들이 각 단계가 끝나면 GameManager에게 알림
 	public synchronized void chatEnd() {
+		System.out.println("=============================");
 		phase = GamePhase.VOTING;
 		broadcast("투표를 시작합니다! (" + GameConfig.VOTE_TIME + "초)");
 		
-		List<Player> voters = getAlivePlayers();
-		List<Player> candidates = new ArrayList<Player>();
-		for(Player p : voters) {
+		List<Player> candidates = getAlivePlayers();
+		List<Player> voters = new ArrayList<Player>();
+		for(Player p : candidates) {
 			if (!p.isBot()) {
-				candidates.add(p);
+				voters.add(p);
 			}
 		}
 		voteManager.startVote(voters, candidates); //voters랑 candidates 생성해서 VoteManager에게 넘겨줌
@@ -114,6 +129,7 @@ public class GameManager {
 	};
 	
 	public synchronized void voteEnd(List<Player> topVoted) {
+		System.out.println("=============================");
 		if (topVoted.size() !=1) {
 			broadcast("동률. 다음 라운드 진행");
 			nextRound();
@@ -166,11 +182,11 @@ public class GameManager {
 	
 	//=============내부 단계 진행
 	//메시지 전송 — TODO: 통신 연결 후 실제 전송으로 교체(broadcast, sendTo)
-	private void broadcast(String msg) {
+	private void broadcast(String msg) { //참가자 모두에게
 		System.out.println("[전체] " + msg);
 	}
 
-	private void sendTo(Player player, String msg) {
+	private void sendTo(Player player, String msg) { //한 사람한테만
 		System.out.println("[Player" + player.getId() + "에게] " + msg);
 	}	
 	
@@ -184,12 +200,12 @@ public class GameManager {
 		}
 	
 	private void nextRound() {
-		broadcast("===== " + round + "라운드 시작! =====");
-		if (gameJudge.isMaxRoundover(round, maxRound)) {
+		if (gameJudge.isMaxRoundover(round, maxRound)) { //최대라운드 끝났을때
 			finishGame(Role.LIAR);   // 라이어가 아직 남아 있음 -> 라이어 승리
 			return;
 		}
 		round++;
+		broadcast("" + round + "라운드 시작!");
 		phase = GamePhase.CHATTING;
 		chatManager.startChat(getAlivePlayers());
 	}

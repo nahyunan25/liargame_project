@@ -21,16 +21,15 @@ public class Test {
 		List<Player> liars = new ArrayList<>();
 		GameManager gameManager = new GameManager(roomManager, players);
 		
-		Player player1 = new Player(1, false);
+		Player player1 = new Player(1, false); 
 		Player player2 = new Player(2, false);
 		Player player3 = new Player(3, false);
 		Player liar1 = new Player(4, false);
-		players.add(player1);
-		players.add(player2);
-		players.add(player3);
-		players.add(liar1);
 		
-		gameManager.startGame();		
+		gameManager.join(player1);
+		gameManager.join(player2);
+		gameManager.join(player3);
+		gameManager.join(liar1);	
 		
 		gameManager.handleChat(player1, "빨간색이에요");
 		gameManager.handleChat(player2, "아침에 먹으면 좋아요");
