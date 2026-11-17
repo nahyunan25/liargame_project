@@ -51,6 +51,8 @@ public class ClientHandler extends Thread {
 					new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
 			pw = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(),StandardCharsets.UTF_8),true);
 			addWriter(pw);
+			player.setWriter(pw);
+			gameManager.join(player);
 			
 			String request = "";
 			

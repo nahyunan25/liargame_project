@@ -35,7 +35,6 @@ public class ChatManager {
 	
 	//채팅 출력
 	public void handleChat(Player player, String text) {
-		System.out.println("Player" + player.getId() + ": "+ text);
 		nextTurn();
 	}
 	

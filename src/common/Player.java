@@ -58,6 +58,10 @@ public class Player {
 			System.out.println("[Player" + id + "에게] " + msg);
 		}
     }
+    
+    public boolean isConnected() {
+        return writer != null;
+    }
 
     //===== 새 게임 준비 (대기실로 돌아갈 때) =====
     public void resetForNewGame() {

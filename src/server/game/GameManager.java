@@ -100,6 +100,7 @@ public class GameManager {
 	public synchronized void handleLiarGuess(Player player, String answer) {
 		if (phase != GamePhase.LIAR_GUESSING) return;
 		
+		broadcast("라이어가 추측한 답: "+answer);
 		if (gameJudge.checkLiarGuess(answer, keyword)) {
 			finishGame(Role.LIAR);
 		}
@@ -133,18 +134,17 @@ public class GameManager {
 		if (topVoted.size() !=1) {
 			broadcast("동률. 다음 라운드 진행");
 			nextRound();
-			return;
-		}
-		
+			return;}
+
 		Player target = topVoted.get(0);
 		broadcast("최다 득표자: Player" + target.getId());
 		
 		// 라이어 지목 → GameJudge가 판정
 		if (gameJudge.isLiar(target)) {
 			target.setStatus(PlayerStatus.REVEALED_LIAR);
-			liars.add(target);
+			foundLiars.add(target);
 			broadcast("Player" + target.getId() + "은(는) 라이어였습니다!");
-
+			
 			if (gameJudge.isAllLiarsFound(foundLiars, liars.size())) {
 				startLiarGuess();   // 라이어가 모두 밝혀짐 → 정답 단계
 				return;
@@ -183,11 +183,13 @@ public class GameManager {
 	//=============내부 단계 진행
 	//메시지 전송 — TODO: 통신 연결 후 실제 전송으로 교체(broadcast, sendTo)
 	private void broadcast(String msg) { //참가자 모두에게
-		System.out.println("[전체] " + msg);
+		for (Player p : players) {
+	        if (p.isConnected()) p.send(msg);
+	    }
 	}
 
 	private void sendTo(Player player, String msg) { //한 사람한테만
-		System.out.println("[Player" + player.getId() + "에게] " + msg);
+		player.send(msg);
 	}	
 	
 	//살아 있는 사람만
