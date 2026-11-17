@@ -94,12 +94,17 @@ public class GameManager {
 		
 		if (voteManager.isAllVoted()) {
 			turnTimer.stop();
+			broadcast("모두 투표하여 투표가 종료되었습니다.");
 			voteEnd(getTopVoted());
 		};
 	}; 
 	public synchronized void handleLiarGuess(Player player, String answer) {
 		if (phase != GamePhase.LIAR_GUESSING) return;
 		
+		if(player.getRole() != Role.LIAR) {
+			player.send("라이어만 정답을 입력할 수 있습니다.");
+			return;
+		}
 		broadcast("라이어가 추측한 답: "+answer);
 		if (gameJudge.checkLiarGuess(answer, keyword)) {
 			finishGame(Role.LIAR);
@@ -115,7 +120,7 @@ public class GameManager {
 	//담당자들이 각 단계가 끝나면 GameManager에게 알림
 	public synchronized void chatEnd() {
 		System.out.println("=============================");
-		phase = GamePhase.VOTING;
+		changePhase(GamePhase.VOTING);
 		broadcast("투표를 시작합니다! (" + GameConfig.VOTE_TIME + "초)");
 		
 		List<Player> candidates = getAlivePlayers();
@@ -180,9 +185,18 @@ public class GameManager {
 		return phase;
 	};
 	
+	private void changePhase(GamePhase nextPhase) {
+		phase = nextPhase;
+		
+		broadcast("PHASE:"+ nextPhase.name());
+	}
+	
 	//=============내부 단계 진행
 	//메시지 전송 — TODO: 통신 연결 후 실제 전송으로 교체(broadcast, sendTo)
-	private void broadcast(String msg) { //참가자 모두에게
+	public void broadcast(String msg) { //참가자 모두에게
+		if(!msg.startsWith("PHASE:")) {
+			System.out.println(msg);
+		}
 		for (Player p : players) {
 	        if (p.isConnected()) p.send(msg);
 	    }
@@ -208,13 +222,13 @@ public class GameManager {
 		}
 		round++;
 		broadcast("" + round + "라운드 시작!");
-		phase = GamePhase.CHATTING;
+		changePhase(GamePhase.CHATTING);
 		chatManager.startChat(getAlivePlayers());
 	}
 	
 	//라이어 정답 단계
 	private void startLiarGuess() {
-		phase = GamePhase.LIAR_GUESSING;
+		changePhase(GamePhase.LIAR_GUESSING);
 		broadcast("라이어가 모두 밝혀졌습니다! 라이어는 제시어를 맞혀주세요. ("
 				+ GameConfig.LIAR_GUESS_TIME + "초)");
 		turnTimer.start(GameConfig.LIAR_GUESS_TIME);
@@ -222,7 +236,7 @@ public class GameManager {
 		
 	private void finishGame(Role winner) {
 		turnTimer.stop();
-		phase = GamePhase.RESULT;
+		changePhase(GamePhase.RESULT);
 
 		String liarIds = "";
 		for (Player liar : liars) {

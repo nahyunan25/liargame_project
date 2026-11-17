@@ -12,7 +12,9 @@ public class SendMessageThread extends Thread {
 	private PrintWriter pw;
 	private Socket socket;
 	private BufferedReader reader;
-	private int count = 0;
+	
+	//처음 대기 상태
+	private volatile String phase = "WAITING";
 	
 	//메세지를 보낼 준비
 	public SendMessageThread(Socket socket) {
@@ -30,22 +32,32 @@ public class SendMessageThread extends Thread {
 	//메세지 입력 받기
 	public void sendMessage() throws IOException{
 		String message = reader.readLine();
-		if(message == null) return;
+		if(message == null) {
+			interrupt();
+			return;
+		}
 		
+		String currentPhase = phase;
 		String request = "";
 		
 		//메시지 구분
-		if(count == 0) {
+		if(currentPhase.equals("CHATTING")) {
 			request = "CHAT:"+message;
-		} else if(count ==1) {
+		} else if(currentPhase.equals("VOTING")) {
 			request = "VOTE:" + message;
-		} else {
+		} else if(currentPhase.equals("LIAR_GUESSING")) {
 			request = "GUESS:" + message;
+		} else {
+			System.out.println("지금은 입력할 수 없습니다.");
+			return;
 		}
 		
 		//서버에 메세지 보내기
 		pw.println(request);
-		count++;
+	}
+	
+	public void setPhase(String phase) {
+		this.phase = phase;
 	}
 
 	@Override

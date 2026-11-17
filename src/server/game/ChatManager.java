@@ -28,13 +28,26 @@ public class ChatManager {
 		turnOrder = alivePlayers;
 		currentIndex = 0;
 		startTurn(); //ChatManager 내부 진행
-	}; 
+	}
 	
 	//현재 차례 시작
-	public void startTurn() {};
+	public void startTurn() {
+		Player player = turnOrder.get(currentIndex);
+		gameManager.broadcast("Player" + player.getId()+ "의 차례입니다.");
+	}
 	
 	//채팅 출력
 	public void handleChat(Player player, String text) {
+		Player turnPlayer = turnOrder.get(currentIndex);
+		
+		//현재 차례가 아닌 사람
+		if(player.getId() != turnPlayer.getId()) {
+			player.send("본인의 차례에 입력해주세요.");
+			return;
+		}
+		
+		//현재 차례인 사람
+		gameManager.broadcast("Player"+ player.getId()+ ": "+ text);
 		nextTurn();
 	}
 	
