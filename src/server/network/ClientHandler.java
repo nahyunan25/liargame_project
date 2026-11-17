@@ -32,13 +32,18 @@ public class ClientHandler extends Thread {
 	    this.player = new Player(id, false);
 
 	}
-	
+
 	/* 이 메소드는 삭제해도 괜찮을 것 같습니다
 	//플레이어 정보 저장
 	public void setPlayer(Player player) {
 		this.player = player;
 		}
 		*/
+	
+	//Player 전달
+	public Player getPlayer() {
+		return player;
+	}
 
 	@Override
 	public void run() {
@@ -118,6 +123,11 @@ public class ClientHandler extends Thread {
 	private void addWriter(PrintWriter writer) {
 		synchronized (lw) {
 			lw.add(writer);
+			
+			//4명 입장하면 게임 시작
+			if(lw.size() == 1) {
+				gameManager.startGame();
+			}
 		}
 	}
 	

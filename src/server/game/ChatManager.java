@@ -27,15 +27,18 @@ public class ChatManager {
 	public void startChat(List<Player> alivePlayers) { //기본 세팅
 		turnOrder = alivePlayers;
 		currentIndex = 0;
+		gameManager.sendAll("제시어에 대해서 설명하세요.");
 		startTurn(); //ChatManager 내부 진행
-	}; 
+	}
 	
 	//현재 차례 시작
-	public void startTurn() {};
+	public void startTurn() {
+		Player player = turnOrder.get(currentIndex);
+		gameManager.sendAll("Player" + player.getId() + "의 차례입니다.");
+	}
 	
 	//채팅 출력
 	public void handleChat(Player player, String text) {
-		System.out.println("Player" + player.getId() + ": "+ text);
 		nextTurn();
 	}
 	

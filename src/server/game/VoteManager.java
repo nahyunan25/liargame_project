@@ -10,18 +10,39 @@ public class VoteManager {
 	private List<Player> voters; //투표할 수 있는 사람(살아있는 사람)
 	private List<Player> candidates; //투표받을 수 있는 사람(살아있는 사람, 봇)
 	private Map<Player, Player> votes = new HashMap<>(); //누가->누구에게
+	private GameManager gameManager;
+	private boolean voteEnded = false; //투표 종료 여부 저장
 	
+	//GameManager 연결
+	public void setGameManager(GameManager gameManager) {
+		this.gameManager = gameManager;
+	}
 	//투표 시작
 	public void startVote(List<Player> voters, List<Player> candidates) {
 		this.voters = voters;
 		this.candidates = candidates;
 		
 		votes.clear(); //이전 투표 기록 초기화
+		voteEnded=false; //새 투표 시작
+		
+		gameManager.sendAll("투표를 시작합니다.\n라이어라고 생각하는 player의 번호를 입력하세요.");
 	}
 	
 	//투표 내역 저장
 	public void handleVote(Player voter, Player target) {
+		//투표 종료 됐다면 저장 x
+		if(voteEnded == true) {
+			return;
+		}
+		
+		//투표 저장
 		votes.put(voter, target);
+		
+		//모두 투표했는지 확인
+		if(isAllVoted() == true) {
+			voteEnded = true;
+			gameManager.voteEnd();
+		}
 	}
 	
 	
@@ -64,5 +85,21 @@ public class VoteManager {
     	}
     	
     	return result;
+    }
+    
+    public Player mostVotedPlayer() {
+    	Map<Player, Integer> result = countVotes();
+    	
+    	int max = 0;
+    	int index = 0;
+    	
+    	for(int i=0; i<candidates.size(); i++) {
+    		int count = result.get(candidates.get(i));
+    		if(count > max) {
+    			max = count;
+    			index = i;
+    		}
+    	}
+    	return candidates.get(index);
     }
 }

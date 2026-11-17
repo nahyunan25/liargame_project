@@ -12,6 +12,7 @@ import server.game.GameManager;
 import common.Player;
 import server.room.RoomManager;
 import server.room.RoomService;
+import server.game.ChatManager;
 
 public class Server {
     public static final int PORT = 50023; //서버 포트 번호
@@ -36,7 +37,9 @@ public class Server {
             
             
             GameManager gameManager = new GameManager(roomManager, players);
-
+            
+            //메세지 전송 목록 연결
+            gameManager.setWriters(listWriters);
             //클라이언트 연결
             while (true) {
                 Socket socket = serverSocket.accept();
@@ -45,6 +48,9 @@ public class Server {
                         + socket.getRemoteSocketAddress());
                 // (1116) ClientHandler 생성자에 roomService 추가하였습니다
                 ClientHandler handler = new ClientHandler(socket, listWriters, gameManager, roomService);
+                
+                //ClientHandler에서 생성한 player를 리스트에 저장
+                players.add(handler.getPlayer());
                 
                 handler.start();
             }
