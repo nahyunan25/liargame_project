@@ -95,7 +95,7 @@ public class GameManager {
 		if (voteManager.isAllVoted()) {
 			turnTimer.stop();
 			broadcast("모두 투표하여 투표가 종료되었습니다.");
-			voteEnd(getTopVoted());
+			voteEnd(voteManager.getTopVoted());
 		};
 	}; 
 	public synchronized void handleLiarGuess(Player player, String answer) {
@@ -171,7 +171,7 @@ public class GameManager {
 				break;
 			case VOTING:
 				broadcast("투표 시간 종료!");
-				voteEnd(getTopVoted());   // 투표 안 한 사람은 무효표
+				voteEnd(voteManager.getTopVoted());   // 투표 안 한 사람은 무효표
 				break;
 			case LIAR_GUESSING:
 				broadcast("정답 시간 종료!");
@@ -191,6 +191,13 @@ public class GameManager {
 		broadcast("PHASE:"+ nextPhase.name());
 	}
 	
+	public void startChatTimer() {
+		turnTimer.start(GameConfig.CHAT_TIME);
+	}
+	
+	public void stopChatTimer() {
+		turnTimer.stop();
+	}
 	//=============내부 단계 진행
 	//메시지 전송 — TODO: 통신 연결 후 실제 전송으로 교체(broadcast, sendTo)
 	public void broadcast(String msg) { //참가자 모두에게
@@ -248,21 +255,4 @@ public class GameManager {
 		// TODO: Room 상태를 WAITING으로 돌리기 (대기실로)	
 	}
 	
-	// TODO: VoteManager에 getTopVoted()가 생기면 그걸로 교체
-	private List<Player> getTopVoted() {
-		Map<Player, Integer> counts = voteManager.countVotes();
-		List<Player> top = new ArrayList<>();
-		int max = 0;
-		for (Map.Entry<Player, Integer> e : counts.entrySet()) {
-			if (e.getValue() > max) {
-				max = e.getValue();
-				top.clear();
-				top.add(e.getKey());
-			} else if (e.getValue() == max && max > 0) {
-				top.add(e.getKey());
-			}
-		}
-		if (max == 0) top.addAll(counts.keySet());   // 아무도 투표 안 함 → 전원 동률
-		return top;
-	}			
 }

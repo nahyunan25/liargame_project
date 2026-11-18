@@ -33,7 +33,8 @@ public class ChatManager {
 	//현재 차례 시작
 	public void startTurn() {
 		Player player = turnOrder.get(currentIndex);
-		gameManager.broadcast("Player" + player.getId()+ "의 차례입니다.");
+		gameManager.startChatTimer();;
+		gameManager.broadcast("Player" + player.getId()+ "의 차례입니다.(30초)");
 	}
 	
 	//채팅 출력
@@ -45,6 +46,8 @@ public class ChatManager {
 			player.send("본인의 차례에 입력해주세요.");
 			return;
 		}
+		
+		gameManager.stopChatTimer();
 		
 		//현재 차례인 사람
 		gameManager.broadcast("Player"+ player.getId()+ ": "+ text);
@@ -64,6 +67,8 @@ public class ChatManager {
 	}
 	
 	//시간
-	public void timeOut() {};
+	public void timeOut() {
+		nextTurn();
+	};
 
 }

@@ -1,5 +1,6 @@
 package server.game;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -78,4 +79,22 @@ public class VoteManager {
     	
     	return result;
     }
+    
+    //GameManager 내 코드 이동
+	public List<Player> getTopVoted() {
+		Map<Player, Integer> counts = countVotes();
+		List<Player> top = new ArrayList<>();
+		int max = 0;
+		for (Map.Entry<Player, Integer> e : counts.entrySet()) {
+			if (e.getValue() > max) {
+				max = e.getValue();
+				top.clear();
+				top.add(e.getKey());
+			} else if (e.getValue() == max && max > 0) {
+				top.add(e.getKey());
+			}
+		}
+		if (max == 0) top.addAll(counts.keySet());   // 아무도 투표 안 함 → 전원 동률
+		return top;
+	}			
 }
