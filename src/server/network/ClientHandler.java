@@ -51,6 +51,8 @@ public class ClientHandler extends Thread {
 					new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
 			pw = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(),StandardCharsets.UTF_8),true);
 			addWriter(pw);
+			player.setWriter(pw);
+			gameManager.join(player);
 			
 			String request = "";
 			
@@ -67,11 +69,6 @@ public class ClientHandler extends Thread {
 				
 				String[] tokens = request.split(":", 2);
 				
-				//모든 클라이언트한테 입력 내용 보여주기
-				write("Player" + player.getId()+ ": " + tokens[1]);
-				
-				//서버 콘솔에도 출력
-				log("Player" + player.getId()+ ": "+ tokens[1]);
 				
 				//메세지 case
 				switch(tokens[0]) {
@@ -82,8 +79,13 @@ public class ClientHandler extends Thread {
 						break;
 						
 					case "VOTE":
-						int targetId = Integer.parseInt(tokens[1]);
-						gameManager.handleVote(player, targetId);
+						try{
+							int targetId = Integer.parseInt(tokens[1]);
+							gameManager.handleVote(player, targetId);
+						}catch(NumberFormatException e) {
+							player.send("의심되는 player의 번호를 입력해주세요.");
+						}
+						
 						break;
 						
 					case "GUESS":

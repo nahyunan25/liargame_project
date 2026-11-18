@@ -39,7 +39,7 @@ public class RoleAssigner {
 			Player p = players.get(idx);
 			
 			for (Player pl : players) {
-				if (p.getId() == 4) {  // 4번이면 라이어 리스트에 추가
+				if (pl.getId() == 4) {  // 4번이면 라이어 리스트에 추가
 					liars.add(pl);
 				}
 			}

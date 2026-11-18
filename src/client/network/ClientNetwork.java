@@ -24,8 +24,11 @@ public class ClientNetwork {
 			consoleLog("서버 연결 완료!");
 			
 			//메세지를 받는 스레드와 보내는 스레드 실행
-			new ChatClientReceiveThread(socket).start();
-			new SendMessageThread(socket).start();
+			SendMessageThread sendThread = new SendMessageThread(socket);
+			
+			ChatClientReceiveThread receiveThread = new ChatClientReceiveThread(socket, sendThread);
+			receiveThread.start();
+			sendThread.start();
 		} catch(IOException e) {
 			System.out.println("서버 연결 실패: "+ e.getMessage());
 		}
