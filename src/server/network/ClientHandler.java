@@ -79,8 +79,13 @@ public class ClientHandler extends Thread {
 						break;
 						
 					case "VOTE":
-						int targetId = Integer.parseInt(tokens[1]);
-						gameManager.handleVote(player, targetId);
+						try{
+							int targetId = Integer.parseInt(tokens[1]);
+							gameManager.handleVote(player, targetId);
+						}catch(NumberFormatException e) {
+							player.send("의심되는 player의 번호를 입력해주세요.");
+						}
+						
 						break;
 						
 					case "GUESS":
