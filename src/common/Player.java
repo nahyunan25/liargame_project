@@ -5,8 +5,7 @@ import common.Role;
 
 //플레이어 정보
 public class Player {
-    private int id;                  // 플레이어 번호 (발언 순서 기준)
-    private String nickname;        
+    private int id;                  // 플레이어 번호 (발언 순서 기준)       
     private boolean bot;             
     private Role role;             
     private PlayerStatus status;     // ALIVE, DIED, REVEALED_LIAR
