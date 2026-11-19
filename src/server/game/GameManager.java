@@ -9,11 +9,11 @@ import common.GameConfig;
 import common.Player;
 import common.PlayerStatus;
 import common.Role;
+import server.room.Room;
 import server.room.RoomManager;
 
 //역할지정, 채팅, 시간, 투표, 판정
 public class GameManager {
-	private static final int DEMO_START_PLAYERS = 4;
 	//게임 데이터 변수
 	private List<Player> players;
 	private List<Player> liars;
@@ -28,43 +28,50 @@ public class GameManager {
 	private RoleAssigner roleAssigner = new RoleAssigner();
 	private ChatManager chatManager = new ChatManager();
 	private VoteManager voteManager = new VoteManager();
+	private LiarManager liarManager = new LiarManager();
 	private TurnTimer turnTimer = new TurnTimer(this);
-	private GameJudge gameJudge = new GameJudge();
 	
 	//외부 연결
 	private RoomManager roomManager;
+	private Room room;
 	
 	//생성자: RoomManager와 연동
 	public GameManager(RoomManager roomManager, List<Player>players) {
 		this.roomManager = roomManager;
 		this.players = players;
 		chatManager.setGameManager(this);
+		liarManager.setGameManger(this);
 	};
 	
 	//외부에서 호출 -> 담당자에게 넘기기만
 	public synchronized void join(Player player) {
 		players.add(player);
 		player.send("당신은 Player" + player.getId() + "입니다.");
-		broadcast("Player" + player.getId() + " 입장 (" + players.size() + "/" + DEMO_START_PLAYERS + ")");
+		broadcast("Player" + player.getId() + " 입장 (" + players.size() + "/" + room.getPlayerCount()   + ")");
 
-		if (players.size() == DEMO_START_PLAYERS) {
+		if (players.size() == room.getPlayerCount()) {
 			startGame();
 		}
 	}
 	
-	public synchronized void startGame() {
+
+	//==============startGame==============
+	
+	public synchronized void startGame() {//게임 시작
+		setGame();
+		sendRoles();
+		round = 0;
+		nextRound();
+	}
+	
+	public void setGame() { //게임 시작 전 기본 세팅
 		maxRound = GameConfig.getMaxRound(players.size());
-		System.out.println("=============================");
-		
-		//1단계: role assign
-		liars = roleAssigner.selectLiars(players);
-		roleAssigner.assignRoles(players, liars);
-		
-		//2단계: category, keyword 선정
-		category = roleAssigner.pickCategory();
-		keyword = roleAssigner.pickKeyword(category);
-		
-		//3단계: 상태 초기화, 각자에게 역할 안내
+		liars = roleAssigner.assign(players); //라이어 선정 한번에
+		category = PickRandom.pickCategory();
+		keyword = PickRandom.pickKeyword(category);
+	}
+	
+	public void sendRoles() {
 		for (Player p : players) {
 			p.setStatus(PlayerStatus.ALIVE); //상태 alive로 모두 초기화
 			
@@ -74,22 +81,21 @@ public class GameManager {
 			else {
 				sendTo(p, "주제: " + category + " / 제시어: " + keyword);
 			}
-		};
-		System.out.println("=============================");
-		
-		//4단계: 첫 라운드 시작
-		round = 0;
-		nextRound();
+		}
 	}
+	
+	//===============handle_=================
 	
 	public synchronized void handleChat(Player player, String text) { //-> ChatManager의 handleChat과 연결
 		if (phase != GamePhase.CHATTING) return;
 		if (player.getStatus() != PlayerStatus.ALIVE) return; //조건 2가지: CHATTING 상태, ALIVE상태
+		
 		chatManager.handleChat(player, text);
 	}; 
 	public synchronized void handleVote(Player voter, int targetID) { //-> VoteManager의 handleVote과 연결
 		if (phase != GamePhase.VOTING) return;
 		if (voter.getStatus() != PlayerStatus.ALIVE || voter.isBot()) return; //조건 3가지: VOTING 상태, ALIVE상태, not bot
+		
 		voteManager.handleVote(voter, targetID);
 		
 		if (voteManager.isAllVoted()) {
@@ -98,71 +104,29 @@ public class GameManager {
 			voteEnd(voteManager.getTopVoted());
 		};
 	}; 
+	
 	public synchronized void handleLiarGuess(Player player, String answer) {
 		if (phase != GamePhase.LIAR_GUESSING) return;
-		
 		if(player.getRole() != Role.LIAR) {
 			player.send("라이어만 정답을 입력할 수 있습니다.");
 			return;
 		}
+		
 		broadcast("라이어가 추측한 답: "+answer);
-		if (gameJudge.checkLiarGuess(answer, keyword)) {
-			finishGame(Role.LIAR);
-		}
-		else {
-			finishGame(Role.CITIZEN);
-		}
-		System.out.println("=============================");
+		finishGame(liarManager.handleLiarGuess(answer));
 	}; 
 	
 	
-	//GameManager에서 단계 관리
-	//담당자들이 각 단계가 끝나면 GameManager에게 알림
+	//==================ChatManager, VoteManager에서 호출하는 부분 -> 아래 내부 코드로 이동===========
 	public synchronized void chatEnd() {
-		System.out.println("=============================");
-		changePhase(GamePhase.VOTING);
-		broadcast("투표를 시작합니다! (" + GameConfig.VOTE_TIME + "초)");
-		
-		List<Player> candidates = getAlivePlayers();
-		List<Player> voters = new ArrayList<Player>();
-		for(Player p : candidates) {
-			if (!p.isBot()) {
-				voters.add(p);
-			}
-		}
-		voteManager.startVote(voters, candidates); //voters랑 candidates 생성해서 VoteManager에게 넘겨줌
-		turnTimer.start(GameConfig.VOTE_TIME);
+		startVote();
 	};
 	
-	public synchronized void voteEnd(List<Player> topVoted) {
-		System.out.println("=============================");
-		if (topVoted.size() !=1) {
-			broadcast("동률. 다음 라운드 진행");
-			nextRound();
-			return;}
-
-		Player target = topVoted.get(0);
-		broadcast("최다 득표자: Player" + target.getId());
+	public synchronized void voteEnd(List<Player> gettopVoted) {
+		turnTimer.stop();
+		startVoteResult(gettopVoted);
+	}
 		
-		// 라이어 지목 → GameJudge가 판정
-		if (gameJudge.isLiar(target)) {
-			target.setStatus(PlayerStatus.REVEALED_LIAR);
-			foundLiars.add(target);
-			broadcast("Player" + target.getId() + "은(는) 라이어였습니다!");
-			
-			if (gameJudge.isAllLiarsFound(foundLiars, liars.size())) {
-				startLiarGuess();   // 라이어가 모두 밝혀짐 → 정답 단계
-				return;
-			}
-		}		
-		// 3. 시민 지목 → 탈락
-			else {
-				target.setStatus(PlayerStatus.DIED);
-				broadcast("Player" + target.getId() + "은(는) 시민이었습니다. 탈락!");
-			}
-			nextRound();
-		};
-	
 	public synchronized void timeOut() {
 		switch (phase) {
 			case CHATTING:
@@ -179,8 +143,55 @@ public class GameManager {
 				break;
 			default:
 				break;}
-	};
+	};	
 	
+	//===============내부코드=================
+	private void startVote() {
+		System.out.println("=============================");
+		changePhase(GamePhase.VOTING);
+		broadcast("투표를 시작합니다! (" + GameConfig.VOTE_TIME + "초)");
+		
+		List<Player> candidates = getAlivePlayers();
+		List<Player> voters = new ArrayList<Player>();
+		for(Player p : candidates) {
+			if (!p.isBot()) {
+				voters.add(p);
+			}
+		}
+		voteManager.startVote(voters, candidates); //voters랑 candidates 생성해서 VoteManager에게 넘겨줌
+		turnTimer.start(GameConfig.VOTE_TIME);
+	}
+	
+	private void startVoteResult(List<Player> gettopVoted) {
+		if (gettopVoted.size() !=1) {
+			broadcast("동률. 다음 라운드 진행");
+			nextRound();
+			return;}
+
+		Player target = gettopVoted.get(0);
+		broadcast("최다 득표자: Player" + target.getId());
+		
+		// 라이어 지목 → LiarManager가 판정
+		if (liarManager.isLiar(target)) { //1. 라이어 지목 성공
+			broadcast("Player" + target.getId() + "은(는) 라이어였습니다!");
+			
+			if (liarManager.reveal(target)) {//1-1. 모두 밝혀졌을 때 -> LiarGuess
+				changePhase(GamePhase.LIAR_GUESSING);
+				broadcast("라이어가 모두 밝혀졌습니다! 라이어는 제시어를 맞혀주세요. ("+ GameConfig.LIAR_GUESS_TIME + "초)");
+				turnTimer.start(GameConfig.LIAR_GUESS_TIME);
+			}
+			
+			else {nextRound();} //1-2. 라이어 남아있을 때 -> 다음 라운드
+		}
+			
+		else { //2. 라이어 지목 실패(Die)
+			broadcast("Player" + target.getId() + "은(는) 시민이였습니다!");
+			target.setStatus(PlayerStatus.DIED);
+			nextRound();
+			}
+		}		
+
+	//========================================
 	public GamePhase getPhase() {
 		return phase;
 	};
@@ -198,7 +209,7 @@ public class GameManager {
 	public void stopChatTimer() {
 		turnTimer.stop();
 	}
-	//=============내부 단계 진행
+
 	//메시지 전송 — TODO: 통신 연결 후 실제 전송으로 교체(broadcast, sendTo)
 	public void broadcast(String msg) { //참가자 모두에게
 		if(!msg.startsWith("PHASE:")) {
@@ -223,7 +234,7 @@ public class GameManager {
 		}
 	
 	private void nextRound() {
-		if (gameJudge.isMaxRoundover(round, maxRound)) { //최대라운드 끝났을때
+		if (isMaxRoundover(round, maxRound)) { //최대라운드 끝났을때
 			finishGame(Role.LIAR);   // 라이어가 아직 남아 있음 -> 라이어 승리
 			return;
 		}
@@ -233,14 +244,12 @@ public class GameManager {
 		chatManager.startChat(getAlivePlayers());
 	}
 	
-	//라이어 정답 단계
-	private void startLiarGuess() {
-		changePhase(GamePhase.LIAR_GUESSING);
-		broadcast("라이어가 모두 밝혀졌습니다! 라이어는 제시어를 맞혀주세요. ("
-				+ GameConfig.LIAR_GUESS_TIME + "초)");
-		turnTimer.start(GameConfig.LIAR_GUESS_TIME);
-	}	
-		
+	//최대 라운드까지 진행되었을 때
+	public boolean isMaxRoundover(int round, int maxRound) {
+		if (round >= maxRound) return true;
+		else return false;
+	};
+	
 	private void finishGame(Role winner) {
 		turnTimer.stop();
 		changePhase(GamePhase.RESULT);
@@ -254,5 +263,4 @@ public class GameManager {
 				+ " / 라이어: " + liarIds + "/ 제시어: " + keyword);
 		// TODO: Room 상태를 WAITING으로 돌리기 (대기실로)	
 	}
-	
 }

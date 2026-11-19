@@ -4,14 +4,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import common.GameConfig;
 import common.Player;
 import common.Role;
 
 public class RoleAssigner {
 	private Random random = new Random(); //무작위 선택용
 	
-/*	
-	//========================진짜 코드=========================
+	//RoleAssigner를 외부에서 한번에 호출할 수 있는 메서드
+	public List<Player> assign(List<Player> players) {
+		List<Player> liars = selectLiars(players);
+		assignRoles(players, liars);
+		return liars;
+	}
+	
 	//라이어 무작위 선정
 	public List<Player> selectLiars(List<Player> players) {
 		List<Player> liars = new ArrayList<>();
@@ -27,9 +33,8 @@ public class RoleAssigner {
 		}
 		return liars;
 	};
-*/
 	
-	//======================시나리오용(라이어 지정)==============================
+	/*시나리오용(라이어 지정)==============================
 	public List<Player> selectLiars(List<Player> players) {
 		List<Player> liars = new ArrayList<>();
 		int liarCount = 1;
@@ -46,8 +51,7 @@ public class RoleAssigner {
 
 		}
 		return liars;
-	};
-	//================여기까지 시나리오 코드===================
+	};*/
 	
 	
 	//각 플레이어에게 역할 표시(라이어/시민)
@@ -57,10 +61,5 @@ public class RoleAssigner {
 			else p.setRole(Role.CITIZEN);
 		}
 	};
-	
-	//카테고리, 키워드 무작위 선정
-	//다른 클래스로 옮겨도 좋을듯(기능분리)
-	public String pickCategory() {return "과일";};
-	public String pickKeyword(String category) {return "사과";};
 	
 }
