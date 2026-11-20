@@ -15,7 +15,7 @@ public class LiarManager {
 	private Player target;
 	private String answer;
 	
-	public void setGameManger(GameManager gameManager) {
+	public void setGameManager(GameManager gameManager) {
 		this.gameManager = gameManager;
 	}
 	
