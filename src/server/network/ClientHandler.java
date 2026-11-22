@@ -8,24 +8,36 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
+
 import server.game.GameManager;
-import server.room.RoomService;
+import server.room.Room;
+import server.room.RoomManager;
 import common.Player;
 
 public class ClientHandler extends Thread {
 	private GameManager gameManager;
-	private RoomService roomService;
+	private Map<Integer, GameManager> gameManagers;
+	private RoomManager roomManager;
 	private Player player;
 	private static int nextId = 1;
 	private Socket socket;
 	List<PrintWriter> lw;
-	
-	//서버와 클라이언트 연결 중비
+
+	/* 기존 코드 => 생성자 수정
 	public ClientHandler(Socket socket, List<PrintWriter> lw, GameManager gameManager, RoomService roomService) {
 		this.socket = socket;
 		this.lw = lw;
 		this.gameManager = gameManager;
 		this.roomService = roomService;
+	 */
+	
+	//서버와 클라이언트 연결 중비
+	public ClientHandler(Socket socket, List<PrintWriter> lw, Map<Integer, GameManager> gameManagers, RoomManager roomManager) {
+		this.socket = socket;
+		this.lw = lw;
+		this.gameManagers = gameManagers;
+		this.roomManager = roomManager;
 		
 		// Player 객체 생성
 		int id = nextId++;
@@ -33,12 +45,7 @@ public class ClientHandler extends Thread {
 
 	}
 	
-	/* 이 메소드는 삭제해도 괜찮을 것 같습니다
-	//플레이어 정보 저장
-	public void setPlayer(Player player) {
-		this.player = player;
-		}
-		*/
+	
 
 	@Override
 	public void run() {
@@ -52,7 +59,29 @@ public class ClientHandler extends Thread {
 			pw = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(),StandardCharsets.UTF_8),true);
 			addWriter(pw);
 			player.setWriter(pw);
-			gameManager.join(player);
+			
+			// 기존 코드 : gameManager.join(player); => 삭제
+			
+			
+			// 1. Client 가 CREATE ROOM 요청
+			// 예시
+			Room room = roomManager.createRoom(player, "test", "LIAR", "EASY",4, true, null);
+			GameManager gameManager = new GameManager(room);
+			gameManagers.put(room.getRoomId(), gameManager);
+			
+			
+			// 2. Client 가 JOIN ROOM 요청
+			// searchRoom 등을 통해 Client가 입장하고 싶은 roomId를 알아냈다고 가정
+			// 예를 들어 4번 방에 입장
+			int roomId=4;
+			// joinRoom 이 Client가 입장가능한지 Room의 조건을 확인, 결과를 boolean으로 반환
+			if (roomManager.joinRoom(roomId, player)) {
+				int number = roomManager.getPlayerNumber(roomId, player);
+	            player.send("당신은 Player" + player.getId() + "입니다.");
+	        } else {
+	            player.send("방 입장에 실패했습니다.");
+	        }
+			
 			
 			String request = "";
 			

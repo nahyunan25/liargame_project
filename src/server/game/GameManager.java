@@ -36,13 +36,24 @@ public class GameManager {
 	private RoomManager roomManager;
 	private Room room;
 	
-	//생성자: RoomManager와 연동
-	public GameManager(RoomManager roomManager, List<Player>players) {
-		this.roomManager = roomManager;
-		this.players = players;
-		chatManager.setGameManager(this);
-		liarManager.setGameManager(this);
-	};
+	
+    /*기존 코드 => 생성자 수정
+    
+    // 생성자: RoomManager와 연동
+    public GameManager(RoomManager roomManager,List<Player> players) {
+        this.roomManager = roomManager;
+        this.players = players;
+        chatManager.setGameManager(this);
+        liarManager.setGameManager(this);
+    }
+    */
+
+   // 수정: Room 객체를 전달받음
+   public GameManager(Room room) {
+       this.room = room;
+       chatManager.setGameManager(this);
+       liarManager.setGameManager(this);
+   }
 	
 	//외부에서 호출 -> 담당자에게 넘기기만
 	public synchronized void join(Player player) {
@@ -55,14 +66,38 @@ public class GameManager {
 		}
 	}
 	
+	/*
+      기존 코드 => 일부 기능을 다른 클래스로 이동
+     
+      public synchronized void join(Player player) {
+          players.add(player);
+     
+          // 개인 메시지 => ClientHandler
+          player.send("당신은 Player" + player.getId() + "입니다.");
+     
+          // 입장 메시지 => RoomManager
+          broadcast("Player" + player.getId() + " 입장 ("
+                  + players.size() + "/" + START_PLAYERS + ")");
+     
+          // 게임 시작 => 방장 요청 시 시작
+          if (players.size() == START_PLAYERS) {
+              startGame();
+          }
+      }
+     */
+	
 
 	//==============startGame==============
 	
 	public synchronized void startGame() {//게임 시작
-		setGame();
-		sendRoles();
-		round = 0;
-		nextRound();
+        // 수정: Room에 있는 플레이어 목록 복사
+        this.players = new ArrayList<>(room.getPlayers());
+
+        setGame();
+        sendRoles();
+
+        round = 0;
+        nextRound();
 	}
 	
 	public void setGame() { //게임 시작 전 기본 세팅

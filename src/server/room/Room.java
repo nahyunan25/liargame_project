@@ -24,7 +24,12 @@ public class Room {
 	}
 	private String gameMode;
 	private String difficulty;
+	
 	private int maxPlayers;
+	public int getMaxPlayers() {
+		return maxPlayers;
+	}
+
 	private boolean isPublic;
 	private String password;
 	
@@ -47,13 +52,6 @@ public class Room {
 
 	    this.players = new ArrayList<>();
 	    this.players.add(host);
-	    
-	    
-	    // 테스트용 플레이어 4명 생성
-	    // host 의 아이디가 1이라고 가정함
-	    this.players.add(new Player(2, false));
-	    this.players.add(new Player(3, false));
-	    this.players.add(new Player(4, false));
 
 	}
 
@@ -71,7 +69,11 @@ public class Room {
 
 	private List<Player> players;
 	
+	public List<Player> getPlayers() {
+		return players;
+	}
 	
+
 	public void addPlayer(Player player) {
 		if (isPlaying() || isFull()) {
 	        return;
@@ -96,6 +98,10 @@ public class Room {
 	    } else {
 	        host = null;
 	    }
+	}
+	
+	public int getPlayerNumber(Player player) {
+	    return players.indexOf(player) + 1;
 	}
 	
 	// 해당 룸에 현재 플레이어가 몇 명인지 확인
@@ -125,19 +131,5 @@ public class Room {
 	
 	public void startGame() {
 	    this.state = RoomState.PLAYING;
-	}
-	
-	public void printPlayers() {
-	    System.out.println("=== 플레이어 목록 ===");
-
-	    for (Player player : players) {
-	        System.out.print("ID: " + player.getId());
-
-	        if (player == host) {
-	            System.out.print(" (방장)");
-	        }
-
-	        System.out.println();
-	    }
 	}
 }
