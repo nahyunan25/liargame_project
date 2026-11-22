@@ -10,11 +10,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 public class RoomService {
-	Map<Integer, Room> rooms = new LinkedHashMap<>();
+	private Map<Integer, Room> rooms = new LinkedHashMap<>();
 	
-	private int nextRoomId = 0;
+	private int nextRoomId = 1;
 	
-	public Room createRoom(Player host, String title, 
+	public synchronized Room createRoom(Player host, String title, 
 			String gameMode, String difficulty, int maxPlayers, 
 			boolean isPublic, String password) {
 		
@@ -33,12 +33,12 @@ public class RoomService {
 		return room;
 		}
 	
-    	public void deleteRoom(int roomId){
+    	public synchronized void deleteRoom(int roomId){
     		rooms.remove(roomId);
     	};
     	
     	//제목으로 방 찾기
-    	public List<Room> searchRoom(String title) {
+    	public synchronized List<Room> searchRoom(String title) {
             List<Room> result = new ArrayList<>();
 
             for (Room room : rooms.values()) {
@@ -49,11 +49,11 @@ public class RoomService {
             return result;
         }
     	// roomId에 해당하는 room 객체 반환
-    	public Room getRoom(int roomId) {
+    	public synchronized Room getRoom(int roomId) {
     	    return rooms.get(roomId);
     	}
     	
-    	public List<Room> getAllRooms() {
+    	public synchronized List<Room> getAllRooms() {
     		return new ArrayList<>(rooms.values());
     		}
 	

@@ -15,6 +15,9 @@ public class RoomChatManager {
         int number = room.getPlayerNumber(sender);
 
         String msg = "Player" + number + ": " + message;
+        
+        //서버 콘솔에서 방 별 챗 구분
+        System.out.println("[방" + room.getRoomId() + "]" + msg);
 
         // 해당 방의 플레이어들에게 전송
         for (Player p : room.getPlayers()) {

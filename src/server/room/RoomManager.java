@@ -25,6 +25,11 @@ public class RoomManager {
         return roomService.createRoom(host, title, gameMode,
                 difficulty, maxPlayers, isPublic, password);
     }
+	
+	//11.22 임시. 방장, 제목, 최대 인원만
+	public Room createRoom(Player host, String title, int maxPlayers) {
+		return createRoom(host, title, "LIAR", "EASY", maxPlayers, true, null);
+	}
     
     public void deleteRoom(int roomId) {
         roomService.deleteRoom(roomId);
@@ -38,17 +43,22 @@ public class RoomManager {
         return roomService.getAllRooms();
     }
 	
+    public Room getRoom(int roomId) {
+    	return roomService.getRoom(roomId);
+    }
     
     // RoomManager 만의 메소드
 	
     public boolean joinRoom(int roomId, Player player) {
         Room room = roomService.getRoom(roomId);
 
-        if (room == null || room.isPlaying() || room.getPlayerCount() == room.getMaxPlayers()) {
+        if (room == null) {
             return false;
         }
-
-        room.addPlayer(player);
+        
+        if(!room.addPlayer(player)) {
+        	return false;
+        }
 
 		int number = room.getPlayerNumber(player);
 
@@ -64,12 +74,20 @@ public class RoomManager {
     }
     
 	public void leaveRoom(Room room, Player player) {
-		room.removePlayer(player);
-		
-        if (room.isEmpty()) {
-            roomService.deleteRoom(room.getRoomId());
-        } else if (player.equals(room.getHost())) {
-            room.changeHost();
+		synchronized(room) {
+			room.removePlayer(player);
+			
+	        if (room.isEmpty()) {
+	            roomService.deleteRoom(room.getRoomId());
+	        } else if (player.equals(room.getHost())) {
+	            room.changeHost();
+	            
+	            String msg = "Player" + room.getHost().getId() + "이 새로운 방장이 되었습니다.";
+	            System.out.println(msg);
+	            for(int i = 0; i<room.getPlayers().size(); i++) {
+	            	room.getPlayers().get(i).send(msg);
+	            }
+	        }
         }
     }
 	
@@ -90,25 +108,35 @@ public class RoomManager {
 		if (!player.equals(room.getHost())) return false;
 		
 	    if (!room.isWaiting()) {
-	        System.out.println("게임이 진행 중입니다.");
+	        player.send("게임이 진행 중입니다.");
 	        return false;
 	    }
 
 	    if (room.getPlayerCount() < 3) {
-	        System.out.println("최소 3명 이상의 플레이어가 필요합니다.");
+	        player.send("최소 3명 이상의 플레이어가 필요합니다");
 	        return false;
 	    }
-
-	    System.out.println("게임을 시작할 수 있습니다.");
+	    
+	    for(int i=0; i<room.getPlayers().size(); i++) {
+	    	Player p = room.getPlayers().get(i);
+	    	
+	    	if(p.isChoosingRemain()) {
+	    		player.send("아직 게임 종료 후 선택 중인 참가자가 있습니다.");
+	    		return false;
+	    	}
+	    }
+	    player.send("게임을 시작할 수 있습니다.");
 	    return true;
 	}
 	
 	public boolean startGame(Room room, Player player) {
-	    if (!canStartGame(room, player)) {
-	        return false;
-	    }
-	    room.startGame();
-	    return true;
+		synchronized(room) {
+			if (!canStartGame(room, player)) {
+		        return false;
+		    }
+		    room.startGame();
+		    return true;
+		}
 	}
 	
 	public void handleRoomChat(int roomId, Player player, String message) {

@@ -55,6 +55,7 @@ public class GameManager {
        liarManager.setGameManager(this);
    }
 	
+   /* 11/22 삭제
 	//외부에서 호출 -> 담당자에게 넘기기만
 	public synchronized void join(Player player) {
 		players.add(player);
@@ -65,8 +66,8 @@ public class GameManager {
 			startGame();
 		}
 	}
-	
-	/*
+	*/
+   /*
       기존 코드 => 일부 기능을 다른 클래스로 이동
      
       public synchronized void join(Player player) {
@@ -265,7 +266,14 @@ public class GameManager {
 		broadcast("===== 게임 종료 =====");
 		broadcast((winner == Role.LIAR ? "라이어 승리!" : "시민 승리!")
 				+ " / 라이어: " + liarIds + "/ 제시어: " + keyword);
-		// TODO: Room 상태를 WAITING으로 돌리기 (대기실로)	
+		room.returnToWaiting();
+		
+		for(int i = 0; i<players.size(); i++) {
+			Player player = players.get(i);
+			
+			player.setChoosingRemain(true);
+			player.send("1.다시하기  2.종료하기");
+		}
 }
 
 	public GamePhase getPhase() {
