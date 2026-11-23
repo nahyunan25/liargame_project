@@ -21,8 +21,11 @@ public class ClientHandler extends Thread {
 	private RoomManager roomManager;
 	private Player player;
 	private Room room;
+	private RoomEntryHandler roomEntryHandler;
+	private GameRequestHandler gameRequestHandler;
 	private Socket socket;
 	List<PrintWriter> lw;
+
 
 	/* 기존 코드 => 생성자 수정
 	public ClientHandler(Socket socket, List<PrintWriter> lw, GameManager gameManager, RoomService roomService) {
@@ -39,6 +42,7 @@ public class ClientHandler extends Thread {
 		this.gameManagers = gameManagers;
 		this.roomManager = roomManager;
 		
+		this.roomEntryHandler = new RoomEntryHandler(roomManager,gameManagers);
 		// Player 객체 생성
 	    this.player = new Player(0, false);
 
@@ -59,68 +63,14 @@ public class ClientHandler extends Thread {
 			addWriter(pw);
 			player.setWriter(pw);
 			
-			// 기존 코드 : gameManager.join(player); => 삭제
-			
-			
-			//CREATE or JOIN?
-			player.send("1.방생성   2.방입장");
-			String choice = bf.readLine();
-			
-			if (choice == null) {
+			room = roomEntryHandler.enterRoom(player, bf);
+			if(room == null) {
 				return;
 			}
 			
-			switch(choice){
-				case "1":
-					// 1. Client 가 CREATE ROOM 요청(title, maxPlayers까지만 입력 임시)
-					player.send("방 이름을 입력하세요:");
-					String title = bf.readLine();
-					
-					player.send("최대 인원을 입력하세요(3~10):");
-					int maxPlayers = Integer.parseInt(bf.readLine());
-					
-					room = roomManager.createRoom(player, title, maxPlayers);
-					gameManager = new GameManager(room);
-					gameManagers.put(room.getRoomId(), gameManager);
-					
-					player.send("방이 생성되었습니다.");
-					player.send("방 번호:" + room.getRoomId());
-					player.send("방 이름:" + room.getTitle());
-					player.send("최대 인원:" + room.getMaxPlayers());
-					
-					player.send(room.getTitle()+"방에 방장으로 입장했습니다.\n당신은 Player" + player.getId() + "입니다.");
-					break;
-					
-				case "2":
-					// 2. Client 가 JOIN ROOM 요청
-					//전체 방 목록 출력
-					List<Room> rooms = roomManager.getAllRooms();
-					player.send("==== 방 목록 ====");
-					for(int i =0; i<rooms.size(); i++) {
-						Room listedRoom = rooms.get(i);
-						
-						player.send("방 번호:"+listedRoom.getRoomId() 
-						+ " / 방 이름:"+ listedRoom.getTitle()
-						+ " / 인원:" + listedRoom.getPlayerCount()
-						+"/" + listedRoom.getMaxPlayers());
-					}
-					
-					//방 선택
-					player.send("입장할 방 번호를 입력하세요:");
-					int roomId = Integer.parseInt(bf.readLine());
-					
-					if (roomManager.joinRoom(roomId, player)) {
-						room = roomManager.getRoom(roomId);
-						gameManager = gameManagers.get(roomId);
-		
-			            player.send(room.getTitle()+"방에 입장했습니다.\n당신은 Player" + player.getId() + "입니다.");
-			        } else {
-			            player.send("방 입장에 실패했습니다.");
-			            return;
-			        }
-					break;
-			}
+			gameManager = gameManagers.get(room.getRoomId());
 			
+			gameRequestHandler = new GameRequestHandler(gameManager);
 			
 			String request = "";
 			
@@ -135,7 +85,6 @@ public class ClientHandler extends Thread {
 				
 				if(request.trim().isEmpty()) continue;
 				
-				String[] tokens = request.split(":", 2);
 				//게임 종료 후 선택 처리
 				if(player.isChoosingRemain()) {
 					if(request.equals("1")) {
@@ -161,32 +110,8 @@ public class ClientHandler extends Thread {
 					}
 					continue;
 				}
-				//메세지 case
-				switch(tokens[0]) {
-					case "CHAT":
-						if(tokens.length >1) {
-							gameManager.handleChat(player, tokens[1]);
-						}
-						break;
-						
-					case "VOTE":
-						try{
-							int targetId = Integer.parseInt(tokens[1]);
-							gameManager.handleVote(player, targetId);
-						}catch(NumberFormatException e) {
-							player.send("의심되는 player의 번호를 입력해주세요.");
-						}
-						
-						break;
-						
-					case "GUESS":
-						gameManager.handleLiarGuess(player, tokens[1]);
-						break;
-						
-					default:
-						System.out.println("알 수 없는 메세지: "+ request);
-						break;
-				}
+				
+				gameRequestHandler.handleRequest(player, request);
 				
 			}
 		} catch(IOException e) {

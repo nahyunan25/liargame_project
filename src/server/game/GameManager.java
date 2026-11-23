@@ -31,6 +31,7 @@ public class GameManager {
 	private VoteManager voteManager = new VoteManager();
 	private LiarManager liarManager = new LiarManager();
 	private TurnTimer turnTimer = new TurnTimer(this);
+	private GameMessenger gameMessenger = new GameMessenger();
 	
 	//외부 연결
 	private RoomManager roomManager;
@@ -148,7 +149,7 @@ public class GameManager {
 	public synchronized void handleLiarGuess(Player player, String answer) {
 		if (phase != GamePhase.LIAR_GUESSING) return;
 		if(player.getRole() != Role.LIAR) {
-			player.send("라이어만 정답을 입력할 수 있습니다.");
+			sendTo(player, "라이어만 정답을 입력할 수 있습니다.");
 			return;
 		}
 		
@@ -231,11 +232,8 @@ public class GameManager {
 			broadcast("Player" + target.getId() + "은(는) 라이어였습니다!");
 			
 			if (liarManager.reveal(target)) {//1-1. 모두 밝혀졌을 때 -> LiarGuess
-				changePhase(GamePhase.LIAR_GUESSING);
-				broadcast("라이어가 모두 밝혀졌습니다! 라이어는 제시어를 맞혀주세요. ("+ GameConfig.LIAR_GUESS_TIME + "초)");
-				turnTimer.start(GameConfig.LIAR_GUESS_TIME);
+				startLiarGuessing();
 			}
-			
 			else {nextRound();} //1-2. 라이어 남아있을 때 -> 다음 라운드
 		}
 			
@@ -244,7 +242,13 @@ public class GameManager {
 			target.setStatus(PlayerStatus.DIED);
 			nextRound();
 			}
-		}		
+		}
+	
+	private void startLiarGuessing() {
+		changePhase(GamePhase.LIAR_GUESSING);
+		broadcast("라이어가 모두 밝혀졌습니다! 라이어는 제시어를 맞혀주세요. ("+ GameConfig.LIAR_GUESS_TIME + "초)");
+		turnTimer.start(GameConfig.LIAR_GUESS_TIME);
+	}
 	
 	//============부차적 내부코드==============
 	private List<Player> getAlivePlayers() {
@@ -288,7 +292,7 @@ public class GameManager {
 			Player player = players.get(i);
 			
 			player.setChoosingRemain(true);
-			player.send("1.다시하기  2.종료하기");
+			sendTo(player, "1.다시하기  2.종료하기");
 		}
 }
 
@@ -309,20 +313,11 @@ public class GameManager {
 	public void stopChatTimer() {
 		turnTimer.stop();
 	}
-
-	//==============소켓 서버 메시지==================
-	public void broadcast(String msg) { //참가자 모두에게
-		if(!msg.startsWith("PHASE:")) {
-			System.out.println(msg);
-		}
-		for (Player p : players) {
-	        if (p.isConnected()) p.send(msg);
-	    }
-	}
-
-	private void sendTo(Player player, String msg) { //한 사람한테만
-		player.send(msg);
-	}	
 	
-
+	public void broadcast(String msg) {
+		gameMessenger.broadcast(players, msg);
+	}
+	public void sendTo(Player player, String msg) {
+		gameMessenger.sendTo(player,msg);
+	}
 }
