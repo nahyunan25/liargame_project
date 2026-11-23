@@ -150,8 +150,22 @@ public class GameManager {
 			return;
 		}
 		
-		broadcast("라이어가 추측한 답: "+answer);
-		finishGame(liarManager.handleLiarGuess(answer));
+		broadcast("Player" + player.getId()+ "의 추측: "+answer);
+		
+		GuessResult result = liarManager.handleLiarGuess(player, answer);
+		switch(result) {
+		case LIAR_WIN:
+			finishGame(Role.LIAR);
+			break;
+			
+		case CITIZEN_WIN:
+			finishGame(Role.CITIZEN);
+			break;
+			
+		case WAITING:
+			broadcast("오답입니다. 다른 라이어의 답을 기다리는 중입니다.");
+			break;
+		}
 	}; 
 	
 	

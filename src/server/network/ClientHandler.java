@@ -75,6 +75,7 @@ public class ClientHandler extends Thread {
 					// 1. Client 가 CREATE ROOM 요청(title, maxPlayers까지만 입력 임시)
 					player.send("방 이름을 입력하세요:");
 					String title = bf.readLine();
+					
 					player.send("최대 인원을 입력하세요(3~10):");
 					int maxPlayers = Integer.parseInt(bf.readLine());
 					
