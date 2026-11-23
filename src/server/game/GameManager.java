@@ -216,11 +216,8 @@ public class GameManager {
 			broadcast("Player" + target.getId() + "은(는) 라이어였습니다!");
 			
 			if (liarManager.reveal(target)) {//1-1. 모두 밝혀졌을 때 -> LiarGuess
-				changePhase(GamePhase.LIAR_GUESSING);
-				broadcast("라이어가 모두 밝혀졌습니다! 라이어는 제시어를 맞혀주세요. ("+ GameConfig.LIAR_GUESS_TIME + "초)");
-				turnTimer.start(GameConfig.LIAR_GUESS_TIME);
+				startLiarGuessing();
 			}
-			
 			else {nextRound();} //1-2. 라이어 남아있을 때 -> 다음 라운드
 		}
 			
@@ -229,7 +226,13 @@ public class GameManager {
 			target.setStatus(PlayerStatus.DIED);
 			nextRound();
 			}
-		}		
+		}
+	
+	private void startLiarGuessing() {
+		changePhase(GamePhase.LIAR_GUESSING);
+		broadcast("라이어가 모두 밝혀졌습니다! 라이어는 제시어를 맞혀주세요. ("+ GameConfig.LIAR_GUESS_TIME + "초)");
+		turnTimer.start(GameConfig.LIAR_GUESS_TIME);
+	}
 	
 	//============부차적 내부코드==============
 	private List<Player> getAlivePlayers() {
