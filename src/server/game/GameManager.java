@@ -36,14 +36,26 @@ public class GameManager {
 	private RoomManager roomManager;
 	private Room room;
 	
-	//생성자: RoomManager와 연동
-	public GameManager(RoomManager roomManager, List<Player>players) {
-		this.roomManager = roomManager;
-		this.players = players;
-		chatManager.setGameManager(this);
-		liarManager.setGameManager(this);
-	};
 	
+    /*기존 코드 => 생성자 수정
+    
+    // 생성자: RoomManager와 연동
+    public GameManager(RoomManager roomManager,List<Player> players) {
+        this.roomManager = roomManager;
+        this.players = players;
+        chatManager.setGameManager(this);
+        liarManager.setGameManager(this);
+    }
+    */
+
+   // 수정: Room 객체를 전달받음
+   public GameManager(Room room) {
+       this.room = room;
+       chatManager.setGameManager(this);
+       liarManager.setGameManager(this);
+   }
+	
+   /* 11/22 삭제
 	//외부에서 호출 -> 담당자에게 넘기기만
 	public synchronized void join(Player player) {
 		players.add(player);
@@ -54,16 +66,40 @@ public class GameManager {
 			startGame();
 		}
 	}
+	*/
+   /*
+      기존 코드 => 일부 기능을 다른 클래스로 이동
+     
+      public synchronized void join(Player player) {
+          players.add(player);
+     
+          // 개인 메시지 => ClientHandler
+          player.send("당신은 Player" + player.getId() + "입니다.");
+     
+          // 입장 메시지 => RoomManager
+          broadcast("Player" + player.getId() + " 입장 ("
+                  + players.size() + "/" + START_PLAYERS + ")");
+     
+          // 게임 시작 => 방장 요청 시 시작
+          if (players.size() == START_PLAYERS) {
+              startGame();
+          }
+      }
+     */
 	
 
 	//==============startGame==============
 	
 	public synchronized void startGame() {//게임 시작
-		setGame();
-		sendRoles();
-		liarManager.announceLiarCount();
-		round = 0;
-		nextRound();
+	    // 수정: Room에 있는 플레이어 목록 복사
+	    this.players = new ArrayList<>(room.getPlayers());
+
+	    setGame();
+	    sendRoles();
+	    liarManager.announceLiarCount();
+
+	    round = 0;
+	    nextRound();
 	}
 	
 	public void setGame() { //게임 시작 전 기본 세팅
@@ -116,8 +152,22 @@ public class GameManager {
 			return;
 		}
 		
-		broadcast("라이어가 추측한 답: "+answer);
-		finishGame(liarManager.handleLiarGuess(answer));
+		broadcast("Player" + player.getId()+ "의 추측: "+answer);
+		
+		GuessResult result = liarManager.handleLiarGuess(player, answer);
+		switch(result) {
+		case LIAR_WIN:
+			finishGame(Role.LIAR);
+			break;
+			
+		case CITIZEN_WIN:
+			finishGame(Role.CITIZEN);
+			break;
+			
+		case WAITING:
+			broadcast("오답입니다. 다른 라이어의 답을 기다리는 중입니다.");
+			break;
+		}
 	}; 
 	
 	
@@ -232,7 +282,14 @@ public class GameManager {
 		broadcast("===== 게임 종료 =====");
 		broadcast((winner == Role.LIAR ? "라이어 승리!" : "시민 승리!")
 				+ " / 라이어: " + liarIds + "/ 제시어: " + keyword);
-		// TODO: Room 상태를 WAITING으로 돌리기 (대기실로)	
+		room.returnToWaiting();
+		
+		for(int i = 0; i<players.size(); i++) {
+			Player player = players.get(i);
+			
+			player.setChoosingRemain(true);
+			player.send("1.다시하기  2.종료하기");
+		}
 }
 
 	public GamePhase getPhase() {

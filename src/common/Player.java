@@ -10,7 +10,8 @@ public class Player {
     private Role role;             
     private PlayerStatus status;     // ALIVE, DIED, REVEALED_LIAR
     private PrintWriter writer;
-
+    
+    
     public Player(int id, boolean bot) {
         this.id = id;
         this.bot = bot;
@@ -22,6 +23,9 @@ public class Player {
         return id;
     }
 
+    public void setId(int id) {
+    	this.id = id;
+    }
     public boolean isBot() {
         return bot;
     }
@@ -63,6 +67,15 @@ public class Player {
     }
 
     //===== 새 게임 준비 (대기실로 돌아갈 때) =====
+    private boolean choosingRemain = false;
+    public boolean isChoosingRemain() {
+    	return choosingRemain;
+    }
+    
+    public void setChoosingRemain(boolean choosingRemain) {
+    	this.choosingRemain = choosingRemain;
+    }
+    
     public void resetForNewGame() {
         this.role = null;
         this.status = PlayerStatus.ALIVE;

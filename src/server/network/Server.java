@@ -8,11 +8,13 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import server.game.GameManager;
 import common.Player;
-import server.room.RoomManager;
 import server.room.RoomService;
+import server.room.RoomManager;
 
 public class Server {
     public static final int PORT = 50023; //서버 포트 번호
@@ -31,12 +33,12 @@ public class Server {
                     + ":" + PORT + " 서버가 시작됨!");
 
             //게임 관리 객체 생성
-            RoomManager roomManager = new RoomManager();
-            RoomService roomService = new RoomService(roomManager);
-            List<Player> players = new ArrayList<>();
-            
-            
-            GameManager gameManager = new GameManager(roomManager, players);
+            RoomService roomService = new RoomService();
+            RoomManager roomManager = new RoomManager(roomService);
+            // 기존 코드 : List<Player> players = new ArrayList<>(); => 삭제
+
+            // 기존 코드 : GameManager gameManager = new GameManager(roomManager, players); => 수정
+            Map<Integer, GameManager> gameManagers = new ConcurrentHashMap<>();
 
             //클라이언트 연결
             while (true) {
@@ -44,8 +46,7 @@ public class Server {
 
                 consoleLog("클라이언트가 연결되었습니다: "
                         + socket.getRemoteSocketAddress());
-                // (1116) ClientHandler 생성자에 roomService 추가하였습니다
-                ClientHandler handler = new ClientHandler(socket, listWriters, gameManager, roomService);
+                ClientHandler handler = new ClientHandler(socket, listWriters, gameManagers, roomManager);
                 
                 handler.start();
             }
