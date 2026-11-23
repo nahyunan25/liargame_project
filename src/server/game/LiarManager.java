@@ -46,6 +46,10 @@ public class LiarManager {
 		}
 	}
 	
+	public void announceLiarCount() {
+		gameManager.broadcast("이번 게임의 라이어는 " + liars.size() + "명입니다.");
+	}
+	
 	//=============내부 코드===================
 	private boolean checkLiarGuess(String answer, String keyword) {  //라이어가 입력한 답이 맞는지
 		if (answer.equals(keyword)) return true;

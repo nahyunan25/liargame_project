@@ -30,6 +30,12 @@ public class VoteManager {
 			return;
 		}
 		
+		//자기 자신에게 투표했으면
+		if(voter.getId() == target.getId()) {
+			voter.send("자기 자신에게 투표할 수 없습니다.");
+			return;
+		}
+		
 		votes.put(voter, target);
 		voter.send("투표를 완료하였습니다.");
 		
@@ -44,8 +50,17 @@ public class VoteManager {
 		for(int i=0; i <candidates.size(); i++) {
 			if(candidates.get(i).getId() == targetId) {
 				handleVote(voter,candidates.get(i));
-				break;
+				return;
 			}
+		}
+		//없는 플레이어라면
+		if(votes.containsKey(voter)) {
+			voter.send("이미 투표했습니다.");
+			return;
+		}
+		else {
+			voter.send("없는 플레이어입니다. 다시 투표해주세요.");
+			return;
 		}
 	}
 	

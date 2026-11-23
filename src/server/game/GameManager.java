@@ -61,6 +61,7 @@ public class GameManager {
 	public synchronized void startGame() {//게임 시작
 		setGame();
 		sendRoles();
+		liarManager.announceLiarCount();
 		round = 0;
 		nextRound();
 	}
@@ -71,6 +72,7 @@ public class GameManager {
 		category = PickRandom.pickCategory();
 		keyword = PickRandom.pickKeyword(category);
 		liarManager.setLiarManager(liars, keyword);
+		chatManager.setKeyword(keyword);
 	}
 	
 	public void sendRoles() {
@@ -91,7 +93,7 @@ public class GameManager {
 	public synchronized void handleChat(Player player, String text) { //-> ChatManager의 handleChat과 연결
 		if (phase != GamePhase.CHATTING) return;
 		if (player.getStatus() != PlayerStatus.ALIVE) return; //조건 2가지: CHATTING 상태, ALIVE상태
-		
+			
 		chatManager.handleChat(player, text);
 	}; 
 	public synchronized void handleVote(Player voter, int targetID) { //-> VoteManager의 handleVote과 연결

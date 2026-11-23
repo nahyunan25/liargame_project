@@ -2,12 +2,14 @@ package server.game;
 
 import java.util.List;
 import common.Player;
+import common.Role;
 import server.room.Room;
 
 public class ChatManager {
 	private List<Player> turnOrder; //이번 라운드 발언 순서자
 	private int currentIndex; //현재 차례 위치
 	private GameManager gameManager; //채팅 단계 끝나면 알릴 대상
+	private String keyword;
 	/* 지금 필요 없음!
 	private Room room; //채팅 전송용
 	private TurnTimer turnTimer; 
@@ -21,6 +23,10 @@ public class ChatManager {
 	//GameManager 연결
 	public void setGameManager(GameManager gameManager) {
 		this.gameManager = gameManager;
+	}
+	
+	public void setKeyword(String keyword) {
+		this.keyword = keyword;
 	}
 	
 	//채팅 시작
@@ -46,6 +52,12 @@ public class ChatManager {
 			player.send("본인의 차례에 입력해주세요.");
 			return;
 		}
+		
+		//시민이 채팅에 제시어를 입력했을 때
+		if (text.contains(keyword) && (player.getRole() == Role.CITIZEN)) {
+			player.send("제시어는 입력할 수 없습니다. 다시 입력해주세요");
+			return;
+			}
 		
 		gameManager.stopChatTimer();
 		
