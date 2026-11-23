@@ -92,14 +92,15 @@ public class GameManager {
 	//==============startGame==============
 	
 	public synchronized void startGame() {//게임 시작
-        // 수정: Room에 있는 플레이어 목록 복사
-        this.players = new ArrayList<>(room.getPlayers());
+	    // 수정: Room에 있는 플레이어 목록 복사
+	    this.players = new ArrayList<>(room.getPlayers());
 
-        setGame();
-        sendRoles();
+	    setGame();
+	    sendRoles();
+	    liarManager.announceLiarCount();
 
-        round = 0;
-        nextRound();
+	    round = 0;
+	    nextRound();
 	}
 	
 	public void setGame() { //게임 시작 전 기본 세팅
@@ -108,6 +109,7 @@ public class GameManager {
 		category = PickRandom.pickCategory();
 		keyword = PickRandom.pickKeyword(category);
 		liarManager.setLiarManager(liars, keyword);
+		chatManager.setKeyword(keyword);
 	}
 	
 	public void sendRoles() {
@@ -128,7 +130,7 @@ public class GameManager {
 	public synchronized void handleChat(Player player, String text) { //-> ChatManager의 handleChat과 연결
 		if (phase != GamePhase.CHATTING) return;
 		if (player.getStatus() != PlayerStatus.ALIVE) return; //조건 2가지: CHATTING 상태, ALIVE상태
-		
+			
 		chatManager.handleChat(player, text);
 	}; 
 	public synchronized void handleVote(Player voter, int targetID) { //-> VoteManager의 handleVote과 연결
@@ -151,8 +153,22 @@ public class GameManager {
 			return;
 		}
 		
-		broadcast("라이어가 추측한 답: "+answer);
-		finishGame(liarManager.handleLiarGuess(answer));
+		broadcast("Player" + player.getId()+ "의 추측: "+answer);
+		
+		GuessResult result = liarManager.handleLiarGuess(player, answer);
+		switch(result) {
+		case LIAR_WIN:
+			finishGame(Role.LIAR);
+			break;
+			
+		case CITIZEN_WIN:
+			finishGame(Role.CITIZEN);
+			break;
+			
+		case WAITING:
+			broadcast("오답입니다. 다른 라이어의 답을 기다리는 중입니다.");
+			break;
+		}
 	}; 
 	
 	

@@ -10,6 +10,7 @@ import common.Role;
 public class LiarManager {
 	private List<Player> liars;
 	private List<Player> foundLiars = new ArrayList<>();
+	private List<Player> guessedPlayers = new ArrayList<>();
 	private String keyword;
 	private GameManager gameManager;
 	private Player target;
@@ -23,6 +24,7 @@ public class LiarManager {
 		this.liars = liars;
 		this.keyword = keyword;
 		foundLiars.clear();
+		guessedPlayers.clear();
 	}
 	
 	//=============GameManager가 호출하는 부분=============
@@ -37,14 +39,30 @@ public class LiarManager {
 		return isAllLiarsFound(foundLiars, liars.size());
 	}
 	
-	public Role handleLiarGuess(String answer) {
-		if (checkLiarGuess(answer, keyword)) {
-			return Role.LIAR;
-		}
-		else {
-			return Role.CITIZEN;
-		}
+	public boolean hasGuessed(Player player) {
+		return guessedPlayers.contains(player);
 	}
+	
+	public void announceLiarCount() {
+		gameManager.broadcast("이번 게임의 라이어는 " + liars.size() + "명입니다.");
+	}
+	
+	public GuessResult handleLiarGuess(Player player, String answer) {
+		if(hasGuessed(player)) {
+			return GuessResult.WAITING; //다른 라이어 Waiting
+		}
+		guessedPlayers.add(player);
+		
+		if(checkLiarGuess(answer, keyword)) {
+			return GuessResult.LIAR_WIN;
+		}
+		
+		if(guessedPlayers.size() == liars.size()) {
+			return GuessResult.CITIZEN_WIN;
+		}
+		return GuessResult.WAITING; //라이어 waiting
+	}
+
 	
 	//=============내부 코드===================
 	private boolean checkLiarGuess(String answer, String keyword) {  //라이어가 입력한 답이 맞는지
