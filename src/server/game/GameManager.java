@@ -31,6 +31,7 @@ public class GameManager {
 	private VoteManager voteManager = new VoteManager();
 	private LiarManager liarManager = new LiarManager();
 	private TurnTimer turnTimer = new TurnTimer(this);
+	private GameMessenger gameMessenger = new GameMessenger();
 	
 	//외부 연결
 	private RoomManager roomManager;
@@ -146,7 +147,7 @@ public class GameManager {
 	public synchronized void handleLiarGuess(Player player, String answer) {
 		if (phase != GamePhase.LIAR_GUESSING) return;
 		if(player.getRole() != Role.LIAR) {
-			player.send("라이어만 정답을 입력할 수 있습니다.");
+			sendTo(player, "라이어만 정답을 입력할 수 있습니다.");
 			return;
 		}
 		
@@ -272,7 +273,7 @@ public class GameManager {
 			Player player = players.get(i);
 			
 			player.setChoosingRemain(true);
-			player.send("1.다시하기  2.종료하기");
+			sendTo(player, "1.다시하기  2.종료하기");
 		}
 }
 
@@ -293,20 +294,11 @@ public class GameManager {
 	public void stopChatTimer() {
 		turnTimer.stop();
 	}
-
-	//==============소켓 서버 메시지==================
-	public void broadcast(String msg) { //참가자 모두에게
-		if(!msg.startsWith("PHASE:")) {
-			System.out.println(msg);
-		}
-		for (Player p : players) {
-	        if (p.isConnected()) p.send(msg);
-	    }
-	}
-
-	private void sendTo(Player player, String msg) { //한 사람한테만
-		player.send(msg);
-	}	
 	
-
+	public void broadcast(String msg) {
+		gameMessenger.broadcast(players, msg);
+	}
+	public void sendTo(Player player, String msg) {
+		gameMessenger.sendTo(player,msg);
+	}
 }
