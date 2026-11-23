@@ -25,6 +25,10 @@ public class Room {
 	private String gameMode;
 	private String difficulty;
 	
+	public String getDifficulty() {
+		return difficulty;
+	}
+	
 	private int maxPlayers;
 	public int getMaxPlayers() {
 		return maxPlayers;

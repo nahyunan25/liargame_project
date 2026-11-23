@@ -1,5 +1,6 @@
 package server.game;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -10,8 +11,11 @@ import common.GamePhase;
 import common.Player;
 import common.PlayerStatus;
 import common.Role;
+import common.dto.KeywordDto;
 import server.room.Room;
 import server.room.RoomManager;
+import server.dao.DBConnector;
+import server.dao.KeywordDao;
 
 //역할지정, 채팅, 시간, 투표, 판정
 public class GameManager {
@@ -31,6 +35,7 @@ public class GameManager {
 	private VoteManager voteManager = new VoteManager();
 	private LiarManager liarManager = new LiarManager();
 	private TurnTimer turnTimer = new TurnTimer(this);
+	private PickRandom pickRandom = new PickRandom(new KeywordDao(new DBConnector()));
 	
 	//외부 연결
 	private RoomManager roomManager;
@@ -94,18 +99,29 @@ public class GameManager {
         // 수정: Room에 있는 플레이어 목록 복사
         this.players = new ArrayList<>(room.getPlayers());
 
-        setGame();
+        try {
+			setGame();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			
+			room.returnToWaiting();
+			changePhase(GamePhase.WAITING);
+			broadcast("DB 조회에 실패했습니다.");
+			return;
+		}
         sendRoles();
 
         round = 0;
         nextRound();
 	}
 	
-	public void setGame() { //게임 시작 전 기본 세팅
+	public void setGame() throws SQLException { //게임 시작 전 기본 세팅
 		maxRound = GameConfig.getMaxRound(players.size());
 		liars = roleAssigner.assign(players); //라이어 선정 한번에
-		category = PickRandom.pickCategory();
-		keyword = PickRandom.pickKeyword(category);
+		
+		KeywordDto selected = pickRandom.pick(room.getDifficulty());
+		category = selected.getCategory();
+		keyword = selected.getKeyword();
 		liarManager.setLiarManager(liars, keyword);
 	}
 	
