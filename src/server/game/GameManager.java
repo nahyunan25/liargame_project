@@ -128,12 +128,14 @@ public class GameManager {
 	//===============handle_=================
 	
 	public synchronized void handleChat(Player player, String text) { //-> ChatManager의 handleChat과 연결
+		if (isSpectator(player)) return;  
 		if (phase != GamePhase.CHATTING) return;
 		if (player.getStatus() != PlayerStatus.ALIVE) return; //조건 2가지: CHATTING 상태, ALIVE상태
 			
 		chatManager.handleChat(player, text);
 	}; 
 	public synchronized void handleVote(Player voter, int targetID) { //-> VoteManager의 handleVote과 연결
+		if (isSpectator(voter)) return;
 		if (phase != GamePhase.VOTING) return;
 		if (voter.getStatus() != PlayerStatus.ALIVE || voter.isBot()) return; //조건 3가지: VOTING 상태, ALIVE상태, not bot
 		
@@ -147,6 +149,7 @@ public class GameManager {
 	}; 
 	
 	public synchronized void handleLiarGuess(Player player, String answer) {
+		if (isSpectator(player)) return;  
 		if (phase != GamePhase.LIAR_GUESSING) return;
 		if(player.getRole() != Role.LIAR) {
 			sendTo(player, "라이어만 정답을 입력할 수 있습니다.");
