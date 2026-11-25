@@ -26,6 +26,8 @@ public class ClientNetwork {
 			//메세지를 받는 스레드와 보내는 스레드 실행
 			SendMessageThread sendThread = new SendMessageThread(socket);
 			
+			sendThread.setDaemon(true); //송신 혼자 남으면 종료
+			
 			ChatClientReceiveThread receiveThread = new ChatClientReceiveThread(socket, sendThread);
 			receiveThread.start();
 			sendThread.start();

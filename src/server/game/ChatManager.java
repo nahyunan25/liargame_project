@@ -10,6 +10,8 @@ public class ChatManager {
 	private int currentIndex; //현재 차례 위치
 	private GameManager gameManager; //채팅 단계 끝나면 알릴 대상
 	private String keyword;
+	private String foolKeyword;
+	
 	/* 지금 필요 없음!
 	private Room room; //채팅 전송용
 	private TurnTimer turnTimer; 
@@ -25,8 +27,9 @@ public class ChatManager {
 		this.gameManager = gameManager;
 	}
 	
-	public void setKeyword(String keyword) {
+	public void setKeyword(String keyword, String foolKeyword) {
 		this.keyword = keyword;
+		this.foolKeyword = foolKeyword;
 	}
 	
 	//채팅 시작
@@ -53,8 +56,16 @@ public class ChatManager {
 			return;
 		}
 		
-		//시민이 채팅에 제시어를 입력했을 때
-		if (text.contains(keyword) && (player.getRole() == Role.CITIZEN)) {
+		//시민 or 바보모드 라이어가 채팅에 제시어를 입력했을 때
+		String playerKeyword = null;
+		
+		if(player.getRole() == Role.CITIZEN) {
+			playerKeyword = keyword;
+		} else {
+			playerKeyword = foolKeyword;
+		}
+		
+		if (playerKeyword != null && text.contains(playerKeyword)) {
 			player.send("제시어는 입력할 수 없습니다. 다시 입력해주세요");
 			return;
 			}

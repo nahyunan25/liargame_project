@@ -63,6 +63,9 @@ public class LiarManager {
 		return GuessResult.WAITING; //라이어 waiting
 	}
 
+	public int remainingLiarCount() {
+		return liars.size() - foundLiars.size();
+	}
 	
 	//=============내부 코드===================
 	private boolean checkLiarGuess(String answer, String keyword) {  //라이어가 입력한 답이 맞는지
@@ -74,4 +77,5 @@ public class LiarManager {
 		if (foundLiayers.size() == liarCount) return true;
 		else return false;
 	};
+	
 }

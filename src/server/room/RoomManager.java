@@ -1,5 +1,6 @@
 package server.room;
 
+import java.sql.SQLException;
 import java.util.List;
 
 import common.Difficulty;
@@ -8,6 +9,7 @@ import common.Player;
 import server.game.GameManager;
 import server.room.Room;
 import server.room.RoomService;
+import common.dto.RoomDto;
 
 public class RoomManager {
 	private RoomService roomService;
@@ -22,7 +24,7 @@ public class RoomManager {
 	// ClientHandler와 RoomService 사이를 연결해줌
 	public Room createRoom(Player host, String title,
             GameMode gameMode, Difficulty difficulty, int maxPlayers,
-            boolean isPublic, String password) {
+            boolean isPublic, String password) throws SQLException {
 
         return roomService.createRoom(host, title, gameMode,
                 difficulty, maxPlayers, isPublic, password);
@@ -69,6 +71,8 @@ public class RoomManager {
         if(!room.addPlayer(player)) {
         	return false;
         }
+        
+        roomService.updatePlayerCount(room);
 
 		int number = room.getPlayerNumber(player);
 
@@ -86,6 +90,8 @@ public class RoomManager {
 	public void leaveRoom(Room room, Player player) {
 		synchronized(room) {
 			room.removePlayer(player);
+			
+			roomService.updatePlayerCount(room);
 			
 	        if (room.isEmpty()) {
 	            roomService.deleteRoom(room.getRoomId());
@@ -145,6 +151,7 @@ public class RoomManager {
 		        return false;
 		    }
 		    room.startGame();
+		    roomService.updateState(room.getRoomId(), "PLAYING");
 		    return true;
 		}
 	}
@@ -156,5 +163,16 @@ public class RoomManager {
 	        return;
 	    }
 	    roomChatManager.handleChat(room, player, message);
+	}
+	
+	public void returnToWaiting(Room room) {
+	    synchronized (room) {
+	        room.returnToWaiting();
+	        roomService.updateState(room.getRoomId(), "WAITING");
+	    }
+	}
+	
+	public List<RoomDto> getRoomList() throws SQLException {
+	    return roomService.getRoomList();
 	}
 }
