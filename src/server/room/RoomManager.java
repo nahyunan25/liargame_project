@@ -2,6 +2,8 @@ package server.room;
 
 import java.util.List;
 
+import common.Difficulty;
+import common.GameMode;
 import common.Player;
 import server.game.GameManager;
 import server.room.Room;
@@ -19,17 +21,17 @@ public class RoomManager {
 
 	// ClientHandler와 RoomService 사이를 연결해줌
 	public Room createRoom(Player host, String title,
-            String gameMode, String difficulty, int maxPlayers,
+            GameMode gameMode, Difficulty difficulty, int maxPlayers,
             boolean isPublic, String password) {
 
         return roomService.createRoom(host, title, gameMode,
                 difficulty, maxPlayers, isPublic, password);
     }
 	
-	//11.22 임시. 방장, 제목, 최대 인원만
-	public Room createRoom(Player host, String title, int maxPlayers) {
-		return createRoom(host, title, "LIAR", "EASY", maxPlayers, true, null);
-	}
+	//11.22 임시. 방장, 제목, 최대 인원만 => 모드와 난이도 선택 추가
+	/*public Room createRoom(Player host, String title, int maxPlayers) {
+		return createRoom(host, title, GameMode.LIAR, Difficulty.EASY, maxPlayers, true, null);
+	}*/
     
     public void deleteRoom(int roomId) {
         roomService.deleteRoom(roomId);

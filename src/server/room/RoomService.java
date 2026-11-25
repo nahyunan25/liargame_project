@@ -2,6 +2,8 @@ package server.room;
 
 import java.util.Map;
 
+import common.Difficulty;
+import common.GameMode;
 import common.Player;
 
 import java.util.ArrayList;
@@ -15,20 +17,12 @@ public class RoomService {
 	private int nextRoomId = 1;
 	
 	public synchronized Room createRoom(Player host, String title, 
-			String gameMode, String difficulty, int maxPlayers, 
+			GameMode gameMode, Difficulty difficulty, int maxPlayers, 
 			boolean isPublic, String password) {
 		
 		int roomId = nextRoomId++;
-		Room room;
-    
-		if (isPublic) {
-			room = new Room(host, roomId, title, 
-					gameMode, difficulty, maxPlayers);
-		} else {
-			room = new Room(host, roomId, title, gameMode, 
-					difficulty, maxPlayers, password);
-		}
-    
+		Room room = new Room(host, roomId, title, gameMode, difficulty, maxPlayers, isPublic, password);
+
 		rooms.put(roomId, room);
 		return room;
 		}
