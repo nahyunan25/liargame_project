@@ -23,7 +23,14 @@ public class Room {
 		return title;
 	}
 	private String gameMode;
+	public String gameMode() {
+		return gameMode;
+	}
+	
 	private String difficulty;
+	public String difficulty() {
+		return difficulty;
+	}
 	
 	public String getDifficulty() {
 		return difficulty;
@@ -35,7 +42,17 @@ public class Room {
 	}
 
 	private boolean isPublic;
+	public boolean isPublic() {
+		return isPublic;
+	}
 	private String password;
+	public String getPassword() {
+		return password;
+	}
+	
+	public boolean checkPassword(String inputPassword) {
+		return password.equals(inputPassword);
+	}
 	
 
 	// 공개방 생성자

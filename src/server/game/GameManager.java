@@ -54,8 +54,10 @@ public class GameManager {
     */
 
    // 수정: Room 객체를 전달받음
-   public GameManager(Room room) {
+   public GameManager(Room room, RoomManager roomManager) {
        this.room = room;
+       this.roomManager = roomManager;
+       
        chatManager.setGameManager(this);
        liarManager.setGameManager(this);
    }
@@ -104,7 +106,7 @@ public class GameManager {
 		} catch (SQLException e) {
 			e.printStackTrace();
 			
-			room.returnToWaiting();
+			roomManager.returnToWaiting(room);
 			changePhase(GamePhase.WAITING);
 			broadcast("DB 조회에 실패했습니다.");
 			return;
@@ -296,7 +298,7 @@ public class GameManager {
 		broadcast("===== 게임 종료 =====");
 		broadcast((winner == Role.LIAR ? "라이어 승리!" : "시민 승리!")
 				+ " / 라이어: " + liarIds + "/ 제시어: " + keyword);
-		room.returnToWaiting();
+		roomManager.returnToWaiting(room);
 		
 		for(int i = 0; i<players.size(); i++) {
 			Player player = players.get(i);

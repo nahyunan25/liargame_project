@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -33,6 +34,8 @@ public class Server {
 
             //게임 관리 객체 생성
             RoomService roomService = new RoomService();
+            roomService.resetRooms();
+            
             RoomManager roomManager = new RoomManager(roomService);
             // 기존 코드 : List<Player> players = new ArrayList<>(); => 삭제
 
@@ -50,7 +53,7 @@ public class Server {
                 handler.start();
             }
 
-        } catch (IOException e) {
+        } catch (IOException | SQLException e) {
             e.printStackTrace();
         }
     }
