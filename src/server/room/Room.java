@@ -148,7 +148,17 @@ public class Room {
 	public synchronized boolean isEmpty() {
 	    return players.isEmpty();
 	}
-	
+
+	// (추가) 공개방인지
+	public synchronized boolean isPublic() {
+		return isPublic;
+	}
+
+	// (추가, DB랑 연결 필요) 비밀번호 확인: 공개방은 항상 통과, 비공개방은 비밀번호가 같아야 통과
+	public synchronized boolean checkPassword(String input) {
+		if (isPublic) return true;
+		return password != null && password.equals(input);
+	}
 	
 	// 대기실 클래스를 따로 만들지 않고, 상태로 구분
 	// 게임이 시작되면 방의 상태를 변경
