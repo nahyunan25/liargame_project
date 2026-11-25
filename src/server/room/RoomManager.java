@@ -31,6 +31,10 @@ public class RoomManager {
 		return createRoom(host, title, "LIAR", "EASY", maxPlayers, true, null);
 	}
     
+	//11.23 임시. 비공개방인 생성용
+	public Room createRoom(Player host, String title, int maxPlayers, boolean isPublic, String password) {
+		return createRoom(host,title,"LIAR", "EASY", maxPlayers, isPublic, password);
+	}
     public void deleteRoom(int roomId) {
         roomService.deleteRoom(roomId);
     }
@@ -48,8 +52,12 @@ public class RoomManager {
     }
     
     // RoomManager 만의 메소드
-	
-    public boolean joinRoom(int roomId, Player player) {
+	public boolean joinRoom(int roomId, Player player) {
+		return joinRoom(roomId, player, null);
+	}
+    
+	//비공개방 입장용
+    public boolean joinRoom(int roomId, Player player, String password) {
         Room room = roomService.getRoom(roomId);
 
         if (room == null) {

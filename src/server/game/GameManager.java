@@ -251,6 +251,15 @@ public class GameManager {
 	}
 	
 	//============부차적 내부코드==============
+	//채팅창 자체를 잠그는게 좀 복잡해서 일단 해당 참가자한데 알리는 식으로만 진행
+	private boolean isSpectator(Player player) {
+		if (player.getStatus() == PlayerStatus.DIED) {
+			sendTo(player, "탈락하여 관전 중입니다. 게임이 끝날 때까지 채팅, 투표를 할 수 없습니다");
+			return true;
+		}
+		return false;
+	}
+	
 	private List<Player> getAlivePlayers() {
 		List<Player> alive = new ArrayList<>();
 		for (Player p : players) {

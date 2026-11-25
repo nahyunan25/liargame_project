@@ -133,6 +133,16 @@ public class Room {
 	    return players.isEmpty();
 	}
 	
+	//나현 추가
+	public synchronized boolean isPublic() {
+		return isPublic;
+	}
+	
+	//나현 추가: TODO: DB와 연결 필요
+	public synchronized boolean checkPassword(String input) {
+		if (isPublic) return true;
+		return password != null && password.equals(input);
+	}
 	
 	// 대기실 클래스를 따로 만들지 않고, 상태로 구분
 	// 게임이 시작되면 방의 상태를 변경
