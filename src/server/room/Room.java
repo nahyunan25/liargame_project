@@ -3,6 +3,8 @@ package server.room;
 import java.util.ArrayList;
 import java.util.List;
 
+import common.Difficulty;
+import common.GameMode;
 import common.Player;
 
 public class Room {
@@ -22,8 +24,15 @@ public class Room {
 	public String getTitle() {
 		return title;
 	}
-	private String gameMode;
-	private String difficulty;
+	private GameMode gameMode;
+	public GameMode getGameMode() {
+		return gameMode;
+	}
+
+	private Difficulty difficulty;
+	public Difficulty getDifficulty() {
+		return difficulty;
+	}
 	
 	private int maxPlayers;
 	public int getMaxPlayers() {
@@ -32,12 +41,18 @@ public class Room {
 
 	private boolean isPublic;
 	private String password;
+	public String getPassword() {
+		return password;
+	}
 	
 
 	// 공개방 생성자
 	// host는 방을 생성할 때 createRoom을 호출한 플레이어
+	// 11.25 공개방/비공개방 생성자 통합
+	
 	public Room(Player host, int roomId, String title,
-	            String gameMode, String difficulty, int maxPlayers) {
+	            GameMode gameMode, Difficulty difficulty, int maxPlayers,
+	            boolean isPublic, String password) {
 
 	    this.host = host;
 	    this.roomId = roomId;
@@ -45,9 +60,9 @@ public class Room {
 	    this.gameMode = gameMode;
 	    this.difficulty = difficulty;
 	    this.maxPlayers = maxPlayers;
-
-	    this.isPublic = true;
-	    this.password = null;
+	    this.isPublic = isPublic;
+	    this.password = isPublic ? null : password;
+	    
 	    this.state = RoomState.WAITING;
 
 	    this.players = new ArrayList<>();
@@ -55,10 +70,10 @@ public class Room {
 	    this.players.add(host);
 
 	}
-
+	/*
 	// 비공개방 생성자
 	public Room(Player host, int roomId, String title,
-	            String gameMode, String difficulty, int maxPlayers,
+	            GameMode gameMode, Difficulty difficulty, int maxPlayers,
 	            String password) {
 
 	    this(host, roomId, title, gameMode, difficulty, maxPlayers);
@@ -66,6 +81,7 @@ public class Room {
 	    this.isPublic = false;
 	    this.password = password;
 	}
+	*/
 	
 
 	private List<Player> players;
