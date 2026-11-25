@@ -99,7 +99,7 @@ public class RoomEntryHandler {
 		return joinRoom(player, bf, roomManager.searchRoom(roomname));
 	}
 	
-	private Room joinRoom(Player player, BufferedReader bf) throws IOException{
+	private Room joinRoom(Player player, BufferedReader bf, LIst<Room> rooms) throws IOException{
 		List<Room> rooms = roomManager.getAllRooms();
 		player.send("==== 방 목록 ====");
 		
