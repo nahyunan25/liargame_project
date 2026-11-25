@@ -52,12 +52,20 @@ public class RoomManager {
     // RoomManager 만의 메소드
 	
     public boolean joinRoom(int roomId, Player player) {
-        Room room = roomService.getRoom(roomId);
+    return joinRoom(roomId, player, null);
+}
 
-        if (room == null) {
-            return false;
-        }
-        
+	//비공개방 입장용: 비밀번호가 맞아야 입장
+	public boolean joinRoom(int roomId, Player player, String password) {
+	    Room room = roomService.getRoom(roomId);
+	
+	    if (room == null) {
+	        return false;
+	    }
+	
+	    if (!room.checkPassword(password)) {
+	        return false;
+	    }
         if(!room.addPlayer(player)) {
         	return false;
         }
