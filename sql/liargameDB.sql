@@ -53,6 +53,24 @@ INSERT INTO `keywords` (`keyword_id`, `category_id`, `keyword`, `difficulty`) VA
 	(7, 2, '오리너구리', 'HARD'),
 	(8, 2, '두더지', 'HARD');
 
+-- 테이블 liargame.rooms 구조 내보내기
+CREATE TABLE IF NOT EXISTS `rooms` (
+  `room_id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(50) NOT NULL DEFAULT '0',
+  `game_mode` varchar(50) DEFAULT NULL,
+  `difficulty` varchar(50) DEFAULT NULL,
+  `is_public` tinyint(4) DEFAULT NULL,
+  `current_players` int(11) DEFAULT NULL,
+  `max_players` int(11) DEFAULT NULL,
+  `state` varchar(50) DEFAULT NULL,
+  `password` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`room_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+
+-- 테이블 데이터 liargame.rooms:~1 rows (대략적) 내보내기
+INSERT INTO `rooms` (`room_id`, `title`, `game_mode`, `difficulty`, `is_public`, `current_players`, `max_players`, `state`, `password`) VALUES
+	(1, '안녕', 'FOOL', 'EASY', 0, 1, 5, 'WAITING', '비밀번호');
+
 /*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
 /*!40014 SET FOREIGN_KEY_CHECKS=IFNULL(@OLD_FOREIGN_KEY_CHECKS, 1) */;
