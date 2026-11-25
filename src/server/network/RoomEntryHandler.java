@@ -36,7 +36,7 @@ public class RoomEntryHandler {
 		case "1" :
 			return createRoom(player, bf);
 		case "2" :
-			return joinRoom(player, bf);
+			return joinRoom(player, bf, roomManager.getAllRooms());
 			
 		default:
 			player.send("1 또는 2를 입력해주세요.");
@@ -99,8 +99,7 @@ public class RoomEntryHandler {
 		return joinRoom(player, bf, roomManager.searchRoom(roomname));
 	}
 	
-	private Room joinRoom(Player player, BufferedReader bf, LIst<Room> rooms) throws IOException{
-		List<Room> rooms = roomManager.getAllRooms();
+	private Room joinRoom(Player player, BufferedReader bf, List<Room> rooms) throws IOException{
 		player.send("==== 방 목록 ====");
 		
 		for(int i =0; i<rooms.size(); i++) {
