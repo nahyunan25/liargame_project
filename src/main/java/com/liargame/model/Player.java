@@ -9,7 +9,7 @@ public class Player {
     private boolean bot;             
     private Role role;             
     private PlayerStatus status;     // ALIVE, DIED, REVEALED_LIAR
-    private PrintWriter writer;
+    //private PrintWriter writer;
     
     
     public Player(int id, boolean bot) {
