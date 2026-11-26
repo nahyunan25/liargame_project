@@ -1,6 +1,6 @@
 package com.liargame.model;
 
-import java.io.PrintWriter;
+//import java.io.PrintWriter;
 
 
 //플레이어 정보
@@ -48,8 +48,8 @@ public class Player {
         this.status = status;
     }
     
-    //===== 메시지 전송 =====
-    public void setWriter(PrintWriter writer) {
+    //===== 메시지 전송 ===== websocket-> 정리
+    /*public void setWriter(PrintWriter writer) {
     	this.writer = writer;
     }
     
@@ -64,7 +64,7 @@ public class Player {
     
     public boolean isConnected() {
         return writer != null;
-    }
+    }*/
 
     //===== 새 게임 준비 (대기실로 돌아갈 때) =====
     private boolean choosingRemain = false;
