@@ -1,5 +1,6 @@
 package com.liargame.service;
 
+
 public class TurnTimer implements Runnable{
 	
 	private Runnable timeoutAction;
@@ -34,6 +35,10 @@ public class TurnTimer implements Runnable{
 		} catch(InterruptedException e) {
 			
 		}
+	}
+	
+	public boolean isCurrentThread() {
+		return Thread.currentThread() == timerThread;
 	}
 	
 	

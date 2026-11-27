@@ -19,6 +19,7 @@ public class GameRepository {
 		return games.get(roomId);
 	}
 	
+	//TODO: 방이 삭제될때 해당 게임의 타이머 중지 후 game 제거
 	public void deleteByRoomId(int roomId) {
 		games.remove(roomId);
 	}
